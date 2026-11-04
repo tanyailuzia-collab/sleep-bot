@@ -29,7 +29,11 @@ Used for BOTH brands: UA (@tanyadonchenko_proson, Ukrainian text) and EN (@donch
 5. `node render.js story.html out.mp4 --subs=0` → out.mp4 (video+SFX), out.silent.mp4, out.sfx.mp3.
    Use --subs=0 when ChatPlace burns subtitles; without the flag our own word-pop subtitles are drawn.
 
-## Voice with intonation (ChatPlace → ElevenLabs)
-Narration text marks the delivery per phrase. See the Notion page «🎨 Стиль рилсів і бренд ENG», section «Сторі-рилси»,
-for which marking method passed the test (audio tags like [whispers] / [shouts] / [slowly], or punctuation only).
-voiceover.stability low (~0.3) and style high (~0.6) give more expressive delivery.
+## Voice, sounds, subtitles (approved 04.11.2026 — test variant B)
+- Render with --subs=0, cut out.silent.mp4 into parts (integer seconds, <=30 s each), push parts + out.sfx.mp3 to branch media.
+- virale_multi_video_generate: parts = silent clips, music true + musicUrl = raw URL of out.sfx.mp3 (our SFX bed),
+  subtitles true, subtitleStyle "bold_impact", subtitleLanguage uk/en,
+  voiceover {text, voiceId "Alice", language "uk"|"en", stability 0.3, style 0.7}.
+- Intonation ONLY through punctuation: "..." = pause / whisper / slow, "!" and CAPS = loud, short choppy sentences = fast,
+  one paragraph per scene. Do NOT use bracket tags like [whispers].
+- Approved sample: 2026-11/story-test (ChatPlace task 01a1a862-7b55-731a-8151-0349d92f19e3).
