@@ -1,0 +1,123 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:R;font-weight:400;src:url(node_modules/@fontsource/roboto/files/roboto-cyrillic-400-normal.woff2)}
+@font-face{font-family:R;font-weight:400;src:url(node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff2)}
+@font-face{font-family:R;font-weight:500;src:url(node_modules/@fontsource/roboto/files/roboto-cyrillic-500-normal.woff2)}
+@font-face{font-family:R;font-weight:500;src:url(node_modules/@fontsource/roboto/files/roboto-latin-500-normal.woff2)}
+@font-face{font-family:R;font-weight:700;src:url(node_modules/@fontsource/roboto/files/roboto-cyrillic-700-normal.woff2)}
+@font-face{font-family:R;font-weight:700;src:url(node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff2)}
+@font-face{font-family:R;font-weight:900;src:url(node_modules/@fontsource/roboto/files/roboto-cyrillic-900-normal.woff2)}
+@font-face{font-family:R;font-weight:900;src:url(node_modules/@fontsource/roboto/files/roboto-latin-900-normal.woff2)}
+:root{--bg:#FFFFFF;--card:#F8F9F9;--card2:#F0F1F2;--ink:#1F2937;--muted:#6B7280;--blue:#2563EB;--pink:#F43F75;--lblue:#DCE5FB;--lpink:#FDE2EB;--yellow:#F8C838}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:var(--bg);font-family:R,sans-serif;color:var(--ink)}
+.stage{position:absolute;inset:0}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+.b1{width:760px;height:760px;background:var(--lblue);left:-220px;top:-180px}
+.b2{width:640px;height:640px;background:var(--lpink);right:-240px;bottom:200px}
+.top{position:absolute;left:var(--m);right:var(--m);top:80px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:30px;letter-spacing:2px}
+.tag{background:var(--blue);color:#fff;padding:12px 24px;border-radius:40px}
+.handle{color:var(--muted);font-weight:500;letter-spacing:0}
+.progress{position:absolute;left:var(--m);right:var(--m);top:160px;height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--pink);transform-origin:left}
+.scene{position:absolute;left:var(--m);right:var(--m);top:var(--top);opacity:0}
+.v .scene{height:1000px}
+.h .scene{height:700px;display:flex;gap:80px;align-items:center}
+.h .txt{flex:1.4}.h .ico{flex:1;display:flex;justify-content:center}
+.v .ico{display:flex;justify-content:center;margin:70px 0 40px}
+@keyframes sceneIn{0%{opacity:0;transform:translateY(60px)}8%{opacity:1;transform:none}92%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-40px)}}
+.h1{font-weight:900;font-size:var(--h1);line-height:1.04;letter-spacing:-2px}
+.h2{font-weight:900;font-size:var(--h2);line-height:1.1;letter-spacing:-1px}
+.p{font-weight:500;font-size:var(--p);line-height:1.32}
+.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:36px;padding:44px;border-left:10px solid var(--blue);margin-top:50px}
+.card.pk{border-left-color:var(--pink)}
+.num{font-weight:900;font-size:var(--num);line-height:1;color:var(--blue);letter-spacing:-6px}
+.pop{opacity:0;animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+.slide{opacity:0;animation:slide .7s ease-out both}
+@keyframes slide{from{opacity:0;transform:translateX(-80px)}to{opacity:1;transform:none}}
+.badge{display:inline-block;background:var(--lpink);color:var(--pink);font-weight:700;font-size:34px;padding:12px 26px;border-radius:30px}
+.badge.b{background:var(--lblue);color:var(--blue)}
+.row{display:flex;gap:28px;align-items:center}
+.dot{width:110px;height:110px;border-radius:50%;background:var(--blue);color:#fff;font-weight:900;font-size:60px;display:flex;align-items:center;justify-content:center;flex:none}
+.dot.p2{background:var(--pink)}
+.btn{background:var(--pink);color:#fff;border-radius:40px;padding:56px;text-align:center;margin-top:50px}
+/* icon motions */
+.wob{animation:wob 1.2s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
+@keyframes wob{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(14deg)}}
+.updown{animation:ud 1.4s ease-in-out infinite;transform-box:fill-box}
+@keyframes ud{0%,40%{transform:translateY(60px)}55%,90%{transform:translateY(0)}100%{transform:translateY(60px)}}
+.rock{animation:rock 1.6s ease-in-out infinite}
+@keyframes rock{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(18deg)}}
+.strike{stroke-dasharray:900;stroke-dashoffset:900;animation:draw .8s ease-out both}
+@keyframes draw{to{stroke-dashoffset:0}}
+.spark{animation:spark 1.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spark{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.hand{animation:spin 6s linear infinite;transform-origin:150px 150px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.grow{transform-box:fill-box;transform-origin:bottom;animation:grow 1s ease-out both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.float{animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-24px)}}
+</style></head>
+<body><div class="stage" id="stage">
+<div class="blob b1" id="b1"></div><div class="blob b2" id="b2"></div>
+<div class="top"><span class="tag" id="tag"></span><span class="handle" id="handle"></span></div>
+<div class="progress"><i id="prog"></i></div>
+</div>
+<script>
+const C=window.REEL, H=C.format==='16:9';
+document.body.className=H?'h':'v';
+const W=H?1920:1080, HH=H?1080:1920;
+document.documentElement.style.cssText=`width:${W}px;height:${HH}px;--m:${H?110:72}px;--top:${H?230:250}px;--h1:${H?96:100}px;--h2:${H?72:76}px;--p:${H?40:44}px;--num:${H?200:220}px`;
+document.body.style.cssText=`width:${W}px;height:${HH}px`;
+document.getElementById('tag').textContent=C.tag;document.getElementById('handle').textContent=C.handle;
+const st=document.getElementById('stage');
+const ICON={
+clock:`<svg viewBox="0 0 300 300" width="360"><circle cx="150" cy="150" r="130" fill="#F8F9F9" stroke="#1F2937" stroke-width="12"/><line x1="150" y1="150" x2="150" y2="70" stroke="#1F2937" stroke-width="12" stroke-linecap="round"/><line class="hand" x1="150" y1="150" x2="215" y2="150" stroke="#F43F75" stroke-width="10" stroke-linecap="round"/><circle cx="150" cy="150" r="12" fill="#2563EB"/></svg>`,
+crib:`<svg viewBox="0 0 900 560" width="760"><rect x="80" y="300" width="740" height="230" rx="30" fill="none" stroke="#1F2937" stroke-width="12"/>${[0,1,2,3,4,5,6,7].map(i=>`<line x1="${150+i*90}" y1="300" x2="${150+i*90}" y2="530" stroke="#1F2937" stroke-width="8" opacity=".25"/>`).join('')}<g class="updown"><circle cx="450" cy="190" r="70" fill="#F8B0C8"/><rect x="390" y="250" width="120" height="150" rx="50" fill="#F43F75"/></g></svg>`,
+roly:`<svg viewBox="0 0 300 360" width="300"><g class="wob"><ellipse cx="150" cy="250" rx="110" ry="100" fill="#2563EB"/><circle cx="150" cy="110" r="70" fill="#B0C0F0"/></g></svg>`,
+nope:`<svg viewBox="0 0 400 380" width="380"><g class="rock" style="transform-origin:200px 20px"><line x1="200" y1="20" x2="200" y2="200" stroke="#1F2937" stroke-width="8"/><circle cx="200" cy="240" r="60" fill="#F8B0C8"/></g><line class="strike" data-d="1" x1="40" y1="40" x2="360" y2="350" stroke="#F43F75" stroke-width="22" stroke-linecap="round"/></svg>`,
+wave:`<svg viewBox="0 0 800 300" width="760"><path class="wave" d="" fill="none" stroke="#2563EB" stroke-width="14" stroke-linecap="round"/></svg>`,
+spark:`<svg viewBox="0 0 300 300" width="300" class="spark"><path d="M150 20 L178 122 L280 150 L178 178 L150 280 L122 178 L20 150 L122 122Z" fill="#F8C838"/></svg>`,
+bars:`<svg viewBox="0 0 500 360" width="560">${[120,200,90,260,170,300].map((h,i)=>`<rect class="grow" data-d="${0.2+i*0.15}" x="${20+i*80}" y="${340-h}" width="56" height="${h}" rx="14" fill="${i==5?'#F43F75':'#2563EB'}" opacity="${i==5?1:.75}"/>`).join('')}<line x1="0" y1="342" x2="500" y2="342" stroke="#1F2937" stroke-width="6"/></svg>`,
+diary:`<svg viewBox="0 0 420 340" width="460" class="float"><rect x="20" y="20" width="380" height="300" rx="24" fill="#F8F9F9" stroke="#1F2937" stroke-width="10"/><line x1="210" y1="20" x2="210" y2="320" stroke="#1F2937" stroke-width="6"/>${[0,1,2,3,4].map(i=>`<line class="strike" data-d="${0.3+i*0.2}" x1="50" y1="${80+i*50}" x2="${170-(i%2)*40}" y2="${80+i*50}" stroke="#2563EB" stroke-width="10" stroke-linecap="round"/><line class="strike" data-d="${0.4+i*0.2}" x1="240" y1="${80+i*50}" x2="${370-(i%3)*40}" y2="${80+i*50}" stroke="#F43F75" stroke-width="10" stroke-linecap="round"/>`).join('')}</svg>`,
+moon:`<svg viewBox="0 0 300 300" width="320" class="float"><path d="M200 40 A120 120 0 1 0 260 200 A95 95 0 1 1 200 40Z" fill="#2563EB"/><circle class="spark" cx="70" cy="70" r="12" fill="#F8C838"/><circle class="spark" cx="250" cy="90" r="9" fill="#F8C838"/></svg>`,
+heart:`<svg viewBox="0 0 300 280" width="300" class="spark"><path d="M150 260 C40 180 10 120 40 70 C70 20 130 30 150 80 C170 30 230 20 260 70 C290 120 260 180 150 260Z" fill="#F43F75"/></svg>`,
+ring:`<svg viewBox="0 0 200 200" width="260"><circle cx="100" cy="100" r="86" fill="none" stroke="#F0F1F2" stroke-width="22"/><circle class="ringp" cx="100" cy="100" r="86" fill="none" stroke="#2563EB" stroke-width="22" stroke-dasharray="540" stroke-dashoffset="540" transform="rotate(-90 100 100)" stroke-linecap="round"/></svg>`
+};
+const words=s=>(s||'').trim().split(/\s+/).filter(Boolean).length;
+const WPS=C.wps||2.45;
+let t0=0; const timed=[];
+function add(sc){
+  const dur=sc.dur||Math.max(3.4,words(sc.voice)/WPS+0.7);
+  const d=document.createElement('div');d.className='scene';
+  d.style.animation=`sceneIn ${dur}s linear ${t0}s both`;
+  const ic=sc.icon?`<div class="ico pop" data-d="0.5">${ICON[sc.icon]}</div>`:'';
+  let txt='';
+  if(sc.type==='hook') txt=`${sc.badge?`<div class="badge pop" data-d="0.1">${sc.badge}</div>`:''}${sc.big?`<div class="num pop" data-d="0.3" style="margin-top:30px">${sc.big}</div>`:''}<div class="h1 slide" data-d="0.8" style="margin-top:24px">${sc.title}</div>${sc.sub?`<div class="p muted slide" data-d="1.5" style="margin-top:30px">${sc.sub}</div>`:''}`;
+  if(sc.type==='chapter') txt=`<div class="badge b pop" data-d="0.1">${sc.badge||''}</div><div class="h1 slide" data-d="0.5" style="margin-top:30px">${sc.title}</div>`;
+  if(sc.type==='point') txt=`<div class="row slide" data-d="0.1">${sc.n?`<div class="dot ${sc.n%2?'':'p2'}">${sc.n}</div>`:''}<div class="h2">${sc.title}</div></div>${sc.body?`<div class="card ${sc.n%2?'':'pk'} slide" data-d="1.3"><div class="p">${sc.body}</div></div>`:''}`;
+  if(sc.type==='statement') txt=`<div class="h${sc.big?1:2} slide" data-d="0.2">${sc.title}</div>${sc.sub?`<div class="p muted slide" data-d="1.2" style="margin-top:36px">${sc.sub}</div>`:''}`;
+  if(sc.type==='cta') txt=`<div class="h2 slide" data-d="0.1">${sc.title}</div><div class="btn pop" data-d="0.6"><div class="h1" style="font-size:calc(var(--h1)*.8)">${sc.button}</div></div><div class="p muted slide" data-d="1.2" style="margin-top:36px;text-align:center">${C.handle}</div>`;
+  d.innerHTML=H?`<div class="txt">${txt}</div>${ic}`:(sc.type==='point'||sc.type==='statement'?`${txt.replace(/(<div class="card[\s\S]*$)/,'')}${ic}${(txt.match(/<div class="card[\s\S]*$/)||[''])[0]}`:`${txt}${ic}`);
+  st.appendChild(d);
+  d.querySelectorAll('[data-d]').forEach(e=>{e.style.animationDelay=(t0+parseFloat(e.dataset.d))+'s'});
+  timed.push({start:t0,dur,el:d});
+  t0+=dur;
+}
+C.scenes.forEach(add);
+window.TOTAL=t0;
+document.getElementById('prog').style.animation=`grow2 ${t0}s linear both`;
+const ss=document.createElement('style');ss.textContent=`@keyframes grow2{from{transform:scaleX(0)}to{transform:scaleX(1)}} #b1{animation:d1 ${t0}s linear both}#b2{animation:d2 ${t0}s linear both}@keyframes d1{to{transform:translate(260px,380px)}}@keyframes d2{to{transform:translate(-240px,-300px)}}`;document.head.appendChild(ss);
+window.setT=function(t){
+  document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000});
+  timed.forEach(s=>{const lt=t-s.start;
+    s.el.querySelectorAll('.wave').forEach(w=>{const amp=110*Math.exp(-Math.max(0,lt-0.8)*0.6);let d='M0 150';for(let x=0;x<=800;x+=12)d+=` L${x} ${150+amp*Math.sin(x/40+t*6)}`;w.setAttribute('d',d)});
+    s.el.querySelectorAll('.ringp').forEach(r=>{const p=Math.min(1,Math.max(0,(lt-1)/(s.dur-1.5)));r.setAttribute('stroke-dashoffset',540*(1-p))});
+  });
+};
+window.VOICE=C.scenes.map(s=>s.voice||'').join(' ').replace(/\s+/g,' ').trim();
+</script></body></html>
