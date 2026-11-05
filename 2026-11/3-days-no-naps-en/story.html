@@ -249,7 +249,7 @@ function s8(lt){const g=ease(lt/2.5);
  // "not by table" badge with strike + IN badge
  const tp=(lt-4.2)/0.3;s+=badge(150,300,'SLEEP CHART',{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:17,p:tp});
  if(lt>5.0){const w=ease((lt-5.0)/0.3)*150;s+=`<line x1="80" y1="300" x2="${80+w}" y2="300" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/>`}
- s+=badge(330,380,'HER OWN NORM',{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:20,icon:'✓',p:(lt-6.6)/0.3});
+ s+=badge(330,380,'INDIVIDUAL NORM',{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:20,icon:'✓',p:(lt-6.6)/0.3});
  s+=embers(lt,10,29);return s}
 
 // S9: end card
