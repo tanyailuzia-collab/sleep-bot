@@ -37,3 +37,17 @@ Used for BOTH brands: UA (@tanyadonchenko_proson, Ukrainian text) and EN (@donch
 - Intonation ONLY through punctuation: "..." = pause / whisper / slow, "!" and CAPS = loud, short choppy sentences = fast,
   one paragraph per scene. Do NOT use bracket tags like [whispers].
 - Approved sample: 2026-11/story-test (ChatPlace task 01a1a862-7b55-731a-8151-0349d92f19e3).
+
+## Variety rule (05.11.2026)
+The 72-Hours reference is a grammar, not a fixed set of shots. Parts of one series look the same; every NEW reel must look
+different from the previous one. Keep: flat 2D, dark bg, bold condensed headline, small rounded badges, 2.5–4 s scenes,
+slow zoom, particles, SFX, Alice voice, cliffhanger end card. Change every new reel:
+- palette (edit object C) — rotate, never repeat the previous one:
+  A warm orange night #1b1310 / #ec3b2e / #f7b500 (used: 3 days without naps + Part 2)
+  B cold blue night #0b1626 / #2ec4b6 / #ff6b5b · C violet dusk #1a1030 / #f43f75 / #f8c838
+  D dark green #0f1f1a / #b5e655 / #ff9f1c · E graphite + cyan #15171c / #4cc9f0 / #ef233c
+- hero (dad, grandma, baby, toddler, twins, mom with another look), locations by topic (kitchen, car, park, bath,
+  kindergarten, plane, nursery, stroller walk), one NEW signature device (battery, gauge, chart, map route, 24h timeline,
+  scales, hourglass, before/after split screen) and a different cover composition.
+- at most 2 scenes reused from the previous reel's set. Draw new SVG objects in the same flat style.
+Log every new reel (date · topic · palette · hero · device) in Notion «🎨 Стиль рилсів і бренд ENG» → «Журнал стилів».
