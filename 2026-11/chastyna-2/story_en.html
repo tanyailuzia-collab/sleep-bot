@@ -1,0 +1,426 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-latin-800-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF,U+26A0}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-cyrillic-900-normal.woff2);unicode-range:U+0400-04FF}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-latin-900-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF}
+html,body{margin:0;background:#120d0a;overflow:hidden}
+#s{width:540px;height:960px;display:block}
+text{font-family:RC,sans-serif;font-weight:800}
+</style></head><body>
+<svg id="m" width="10" height="10" style="position:absolute;left:-9999px"></svg><svg id="s" viewBox="0 0 540 960" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const W=540,H=960;
+const C={bg:'#1b1310',bg2:'#2a1c15',bld:'#241914',bldEdge:'#c96f2a',win:'#f2a33a',winOff:'#3a2a20',or:'#e8892c',red:'#ec3b2e',yel:'#f7b500',white:'#ffffff',bp:'#0d2744',bpLine:'#79b4ea',skin:'#e3a77c',skinD:'#c98a62',hair:'#4a2e1f',hood:'#3b3f45'};
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>{x=clamp(x);return 1-Math.pow(1-x,3)};
+const back=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+
+/* ---------- shared pieces ---------- */
+function bgGrad(id,top,bot){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs><rect width="540" height="960" fill="url(#${id})"/>`}
+function embers(t,n=26,seed=1){let s='';for(let i=0;i<n;i++){const sp=20+rnd(i+seed)*40;const x=(rnd(i*3+seed)*W+Math.sin(t*1.3+i)*14)%W;const y=H-((rnd(i*7+seed)*H+t*sp)%H);const r=0.8+rnd(i*5+seed)*1.8;const o=0.35+0.5*Math.abs(Math.sin(t*2+i));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#ffb24a" opacity="${o.toFixed(2)}"/>`}return s}
+function building(x,y,w,h,seed,t,opts={}){let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fill||C.bld}"/>`;
+ if(opts.edge!==false)s+=`<polyline points="${x},${y+h} ${x},${y} ${x+w},${y}" fill="none" stroke="${C.bldEdge}" stroke-width="2" opacity=".85"/>`;
+ const cw=opts.cw||10,ch=opts.ch||13,gx=opts.gx||8,gy=opts.gy||10;let k=0;
+ for(let yy=y+14;yy<y+h-20;yy+=ch+gy){for(let xx=x+10;xx<x+w-cw-4;xx+=cw+gx){k++;const r=rnd(seed*100+k);let on=r>0.62;
+   if(opts.flick&&rnd(seed*31+k)>0.9)on=Math.sin(t*3+k)>0;
+   if(opts.allOff)on=false;
+   s+=`<rect x="${xx}" y="${yy}" width="${cw}" height="${ch}" fill="${on?C.win:C.winOff}" opacity="${on?0.95:0.8}"/>`}}
+ return s}
+function skyline(t,seed,baseY,opts={}){let s='';const items=[[-10,240,90],[70,330,70],[130,180,110],[230,290,80],[300,220,120],[410,310,70],[470,200,90]];
+ items.forEach((b,i)=>{s+=building(b[0],baseY-b[2]-b[1]*0+0-b[1]+b[2],b[2],b[1]+200,seed+i,t,opts)});return s}
+function badge(cx,cy,label,{bg='#dbe9f7',fg='#14365c',size=15,icon='',p=1,stroke='#5b8fc4'}={}){
+ const sc=back(p);const w=label.length*size*0.56+(icon?size*1.4:0)+26;
+ return `<g transform="translate(${cx} ${cy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*3).toFixed(2)}"><rect x="${-w/2}" y="${-size*1.1}" width="${w}" height="${size*2.2}" rx="7" fill="${bg}" stroke="${stroke}" stroke-width="2"/><text x="0" y="${size*0.38}" font-size="${size}" fill="${fg}" text-anchor="middle" letter-spacing=".5">${icon?icon+' ':''}${label}</text></g>`}
+function bigText(x,y,parts,size,p=1,anchor='middle'){const sc=0.6+0.4*back(p);let spans=parts.map(([tx,col])=>`<tspan fill="${col}">${tx}</tspan>`).join('');
+ return `<g transform="translate(${x} ${y}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2.5).toFixed(2)}"><text x="0" y="0" font-size="${size}" font-weight="900" text-anchor="${anchor}" stroke="#000" stroke-width="${size*0.12}" stroke-linejoin="round" paint-order="stroke" letter-spacing="1">${spans}</text></g>`}
+
+/* subtitle: chunk = [[word,color],...]; words pop in sequentially */
+function subtitle(lines,lt,y=640){let s='';const all=lines.flat();let idx=0;
+ lines.forEach((line,li)=>{const size=30;const yy=y+li*36;
+   // measure approx positions
+   const widths=line.map(([w])=>measure(w,size)+size*0.3);const total=widths.reduce((a,b)=>a+b,0);let x=W/2-total/2;
+   line.forEach(([w,col],wi)=>{const p=clamp((lt-idx*0.09)/0.18);idx++;const cx=x+widths[wi]/2;x+=widths[wi];
+     if(p<=0)return;const sc=0.7+0.3*back(p);
+     s+=`<g transform="translate(${cx.toFixed(1)} ${yy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2).toFixed(2)}"><text x="0" y="0" font-size="${size}" text-anchor="middle" fill="${col||'#fff'}" stroke="#000" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${w}</text></g>`})});
+ return s}
+const _mc={};function measure(w,size){const k=w+'|'+size;if(_mc[k])return _mc[k];const svg=document.getElementById('m');svg.innerHTML=`<text font-size="${size}" style="font-family:RC;font-weight:800">${w}</text>`;const v=svg.firstChild.getComputedTextLength();_mc[k]=v;return v}
+const Wd=(str,col)=>str.split(' ').map(w=>[w,col]);
+function subs(chunks,lt,y){ // chunks: [{t0,lines}]
+ if(!window.SUBS)return '';
+ let cur=null;for(const c of chunks)if(lt>=c.t0)cur=c;if(!cur)return '';return subtitle(cur.lines,lt-cur.t0,y)}
+function vignette(){return `<defs><radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient></defs><rect width="540" height="960" fill="url(#vg)"/>`}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">${TX.handle}</text>`}
+
+/* ---------- scenes ---------- */
+// S1: title over night city
+function s1(lt){const z=1+lt*0.025;let s=bgGrad('g1','#0f0b0a','#3a2214');
+ s+=`<circle cx="460" cy="350" r="26" fill="#f6e3b0" opacity=".85"/><circle cx="388" cy="242" r="34" fill="#1a120e" opacity=".0"/>`;
+ s+=`<g transform="translate(270 960) scale(${z}) translate(-270 -960)">`;
+ // back layer
+ s+=`<g opacity=".55">`+[[0,420,100],[95,380,90],[180,460,80],[255,400,110],[360,440,90],[445,390,100]].map((b,i)=>building(b[0],b[1],b[2],600,40+i,lt,{edge:false,fill:'#1d1410'})).join('')+`</g>`;
+ // front: the house with the child's window
+ s+=building(30,470,150,520,3,lt,{});s+=building(350,430,170,560,5,lt,{flick:true});
+ s+=building(190,380,150,620,9,lt,{});
+ // child's window highlight (in middle building)
+ const pulse=0.6+0.4*Math.sin(lt*6);
+ s+=`<rect x="248" y="520" width="34" height="40" fill="${C.yel}" opacity="${pulse}"/><rect x="242" y="514" width="46" height="52" fill="none" stroke="${C.red}" stroke-width="3" opacity="${clamp((lt-0.6)*3)}"/>`;
+ s+=`</g>`;
+ s+=`<rect y="860" width="540" height="100" fill="#120c09"/>`;
+ s+=embers(lt,22,3);
+ s+=bigText(270,150,[['3 ДНІ ',C.red],['БЕЗ ДЕННОГО',C.white]],50,lt/0.35);
+ s+=bigText(270,215,[['СНУ. ',C.white],['ЩО БУДЕ?',C.yel]],58,(lt-0.15)/0.35);
+ s+=badge(270,290,'ГІПОТЕТИЧНИЙ СЦЕНАРІЙ',{icon:'⚠',p:(lt-0.5)/0.3});
+ s+=subs([{t0:0.3,lines:[[...Wd('ДЕНЬ ПЕРШИЙ.')]]},{t0:1.6,lines:[[...Wd('ДЕННИЙ СОН'),['СКАСОВАНО.',C.red]]]}],lt,700);
+ return s}
+
+// S2: clock spinning, awake counter
+function s2(lt){let s=bgGrad('g2','#22160f','#3b2416');
+ // warm room: blurry shapes
+ s+=`<circle cx="90" cy="300" r="120" fill="${C.or}" opacity=".12"/><circle cx="470" cy="620" r="150" fill="${C.red}" opacity=".08"/>`;
+ const cx=270,cy=400,R=150,sc=0.9+0.1*ease(lt/0.4)+lt*0.01;
+ s+=`<g transform="translate(${cx} ${cy}) scale(${sc.toFixed(3)})">`;
+ s+=`<circle r="${R+14}" fill="#2f86c9"/><circle r="${R+6}" fill="#1d5f94"/><circle r="${R}" fill="#f3eadb"/>`;
+ for(let i=0;i<12;i++){const a=i*Math.PI/6;const r1=R-14,r2=R-(i%3?26:34);s+=`<line x1="${(Math.sin(a)*r1).toFixed(1)}" y1="${(-Math.cos(a)*r1).toFixed(1)}" x2="${(Math.sin(a)*r2).toFixed(1)}" y2="${(-Math.cos(a)*r2).toFixed(1)}" stroke="#3a2a20" stroke-width="${i%3?3:6}" stroke-linecap="round"/>`}
+ const hrs=ease(lt/2.3)*7; const ha=(9+hrs)*30, ma=hrs*360;
+ s+=`<line x1="0" y1="0" x2="${(Math.sin(ha*Math.PI/180)*72).toFixed(1)}" y2="${(-Math.cos(ha*Math.PI/180)*72).toFixed(1)}" stroke="#2a1d15" stroke-width="10" stroke-linecap="round"/>`;
+ s+=`<line x1="0" y1="0" x2="${(Math.sin(ma*Math.PI/180)*112).toFixed(1)}" y2="${(-Math.cos(ma*Math.PI/180)*112).toFixed(1)}" stroke="${C.red}" stroke-width="6" stroke-linecap="round"/><circle r="10" fill="#2a1d15"/>`;
+ s+=`</g>`;
+ // motion lines
+ for(let i=0;i<5;i++){const o=0.15+0.15*Math.sin(lt*8+i);s+=`<path d="M ${cx+R+40} ${cy-60+i*30} q 20 0 30 ${-8+i*4}" stroke="#fff" stroke-width="3" fill="none" opacity="${o}"/>`;}
+ const n=Math.max(1,Math.round(hrs));
+ s+=dayBadge(1,lt);s+=badge(270,190,`НЕ СПИТЬ ${n} ГОД`,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:20,icon:'⏱',p:(lt-0.1)/0.3});
+ s+=embers(lt,14,7);
+ s+=subs([{t0:0.1,lines:[[...Wd('ВІН ГРАЄ І СМІЄТЬСЯ.')]]},{t0:1.3,lines:[[...Wd('ЗДАЄТЬСЯ, ВСЕ'),['ДОБРЕ…',C.yel]]]}],lt,700);
+ return s}
+
+// S3: blueprint body, brain alarm
+function s3(lt){let s=`<rect width="540" height="960" fill="${C.bp}"/>`;
+ for(let x=30;x<540;x+=60)for(let y=60;y<960;y+=60)s+=`<path d="M ${x-4} ${y} h8 M ${x} ${y-4} v8" stroke="${C.bpLine}" stroke-width="1" opacity=".3"/>`;
+ s+=`<text x="40" y="70" font-size="14" fill="${C.bpLine}" opacity=".8" letter-spacing="2">НЕРВОВА СИСТЕМА · 1,5 РОКИ</text>`;
+ const sc=1+lt*0.02;
+ s+=`<g transform="translate(270 430) scale(${sc.toFixed(3)}) translate(-270 -430)" fill="none" stroke="${C.bpLine}" stroke-width="3" stroke-linejoin="round">`;
+ // toddler silhouette: big head, short body
+ s+=`<circle cx="270" cy="250" r="78"/>`;
+ s+=`<path d="M 238 326 q -6 14 -2 22 L 200 360 q -30 10 -36 50 L 152 500 q -2 14 12 14 q 12 0 14 -14 L 192 430 L 196 520 q 0 10 6 14 L 206 640 q 0 18 20 18 q 18 0 20 -18 L 256 540 h 28 L 294 640 q 2 18 20 18 q 20 0 20 -18 L 338 534 q 6 -4 6 -14 L 348 430 L 362 500 q 2 14 14 14 q 14 0 12 -14 L 376 410 q -6 -40 -36 -50 L 304 348 q 4 -8 -2 -22"/>`;
+ s+=`</g>`;
+ // brain glow
+ const pul=0.5+0.5*Math.sin(lt*10);const ap=ease((lt-0.3)/0.4);
+ s+=`<g transform="translate(270 430) scale(${sc.toFixed(3)}) translate(-270 -430)">`;
+ s+=`<circle cx="270" cy="235" r="${(40+pul*14)*ap}" fill="${C.red}" opacity="${0.25*ap}"/>`;
+ s+=`<path d="M 236 238 q -6 -34 26 -40 q 14 -12 30 0 q 26 4 20 34 q 6 24 -20 26 q -12 10 -28 2 q -26 2 -28 -22 z" fill="${C.red}" opacity="${0.9*ap}" stroke="#ffb0a8" stroke-width="2"/>`;
+ // adrenal glands (kidneys area)
+ const ap2=ease((lt-0.9)/0.4);
+ s+=`<ellipse cx="248" cy="450" rx="14" ry="20" fill="${C.red}" opacity="${0.85*ap2}"/><ellipse cx="292" cy="450" rx="14" ry="20" fill="${C.red}" opacity="${0.85*ap2}"/>`;
+ s+=`</g>`;
+ // arrows + labels
+ s+=`<g opacity="${ap}"><line x1="420" y1="170" x2="${420-ap*90}" y2="${170+ap*48}" stroke="${C.red}" stroke-width="3"/></g>`;
+ s+=badge(430,150,'КОРТИЗОЛ ↑',{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:18,p:(lt-0.4)/0.3});
+ s+=`<g opacity="${ap2}"><line x1="110" y1="560" x2="${110+ap2*120}" y2="${560-ap2*100}" stroke="${C.red}" stroke-width="3"/></g>`;
+ s+=badge(120,580,'АДРЕНАЛІН ↑',{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:18,p:(lt-1.0)/0.3});
+ s+=subs([{t0:0.1,lines:[[...Wd('АЛЕ МОЗОК ВМИКАЄ')]]},{t0:1.3,lines:[[['АВАРІЙНИЙ',C.red],['РЕЖИМ.',C.red]]]}],lt,760);
+ return s}
+
+// S4: shocked mom, 21:00
+function mom(cx,cy,lt,expr,tired){let s='';const bob=Math.sin(lt*4)*2;
+ s+=`<g transform="translate(${cx} ${cy+bob})">`;
+ // body hoodie
+ s+=`<path d="M -150 330 q 0 -150 150 -160 q 150 10 150 160 z" fill="#8a4a5c"/><path d="M -40 175 q 40 30 80 0 l -10 40 q -30 16 -60 0 z" fill="#6e3a49"/>`;
+ // neck
+ s+=`<rect x="-24" y="120" width="48" height="60" fill="${C.skinD}"/>`;
+ // hair back
+ s+=`<ellipse cx="0" cy="-10" rx="118" ry="130" fill="${C.hair}"/><circle cx="0" cy="-150" r="46" fill="${C.hair}"/>`;
+ // face
+ s+=`<ellipse cx="0" cy="10" rx="96" ry="112" fill="${C.skin}"/>`;
+ s+=`<ellipse cx="-98" cy="18" rx="14" ry="22" fill="${C.skinD}"/><ellipse cx="98" cy="18" rx="14" ry="22" fill="${C.skinD}"/>`;
+ // fringe
+ s+=`<path d="M -100 -20 q 10 -100 100 -100 q 90 0 100 100 q -40 -60 -110 -50 q -40 10 -90 50 z" fill="${C.hair}"/>`;
+ // eyes
+ const look=Math.sin(lt*2.2)*6;const blink=(lt%1.6>1.5)?0.15:1;
+ s+=`<ellipse cx="-38" cy="6" rx="24" ry="${26*blink}" fill="#fff"/><ellipse cx="38" cy="6" rx="24" ry="${26*blink}" fill="#fff"/>`;
+ if(blink>0.5)s+=`<circle cx="${-38+look}" cy="10" r="10" fill="#2a1a12"/><circle cx="${38+look}" cy="10" r="10" fill="#2a1a12"/><circle cx="${-35+look}" cy="6" r="3" fill="#fff"/><circle cx="${41+look}" cy="6" r="3" fill="#fff"/>`;
+ if(tired){s+=`<path d="M -64 ${-20} h 52 v 22 h -52 z M 12 ${-20} h 52 v 22 h -52 z" fill="${C.skin}"/><path d="M -62 2 q 24 6 48 0 M 14 2 q 24 6 48 0" stroke="#3a2216" stroke-width="4" fill="none"/>`;
+  s+=`<path d="M -60 -30 q 20 -4 44 -14 M 60 -30 q -20 -4 -44 -14" stroke="#3a2216" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+  s+=`<path d="M -56 44 q 18 12 36 0 M 20 44 q 18 12 36 0" stroke="#a8705a" stroke-width="5" fill="none"/>`;
+  s+=`<path d="M 0 30 q -8 22 6 26" stroke="${C.skinD}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M -18 88 q 18 -6 36 0" stroke="#7a2a25" stroke-width="5" fill="none" stroke-linecap="round"/></g>`;return s}
+ // brows raised
+ const br=expr*-10;
+ s+=`<path d="M -62 ${-30+br} q 24 -16 46 -4" stroke="#3a2216" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M 62 ${-30+br} q -24 -16 -46 -4" stroke="#3a2216" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+ // eye bags (tired)
+ s+=`<path d="M -56 40 q 18 10 36 0" stroke="${C.skinD}" stroke-width="4" fill="none"/><path d="M 20 40 q 18 10 36 0" stroke="${C.skinD}" stroke-width="4" fill="none"/>`;
+ // nose, mouth
+ s+=`<path d="M 0 30 q -8 22 6 26" stroke="${C.skinD}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+ const mo=10+expr*14;
+ s+=`<ellipse cx="0" cy="84" rx="${12+expr*4}" ry="${mo}" fill="#7a2a25"/><ellipse cx="0" cy="${84+mo*0.45}" rx="${8+expr*2}" ry="${mo*0.35}" fill="#d9675e"/>`;
+ s+=`</g>`;return s}
+function s4(lt){let s=bgGrad('g4','#2b1a12','#1a110c');
+ // blurred window + lamp in background
+ s+=`<rect x="40" y="120" width="170" height="240" rx="6" fill="#0e1a2c" opacity=".7"/><circle cx="160" cy="170" r="16" fill="#f6e3b0" opacity=".6"/>`;
+ s+=`<circle cx="450" cy="240" r="110" fill="${C.or}" opacity=".18"/><circle cx="450" cy="240" r="50" fill="${C.yel}" opacity=".25"/>`;
+ const z=1+lt*0.03;
+ s+=`<g transform="translate(270 960) scale(${z.toFixed(3)}) translate(-270 -960)">`+mom(270,520,lt,ease((lt-0.2)/0.3))+`</g>`;
+ // toddler running silhouette crossing bottom
+ const rx=-80+((lt*260)%700);const leg=Math.sin(lt*22)*14;
+ s+=`<g transform="translate(${rx} 928)" fill="#0c0806"><circle cx="0" cy="-92" r="22"/><rect x="-14" y="-72" width="28" height="44" rx="10"/><path d="M -6 -30 l ${-leg} 34 M 6 -30 l ${leg} 34" stroke="#0c0806" stroke-width="12" stroke-linecap="round"/><path d="M -12 -62 l -22 ${10+leg} M 12 -62 l 22 ${10-leg}" stroke="#0c0806" stroke-width="9" stroke-linecap="round"/></g>`;
+ s+=embers(lt,12,11);
+ s+=badge(270,120,'21:00 · ЧАС СПАТИ',{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:20,icon:'🕘',p:(lt-0.05)/0.3});
+ s+=subs([{t0:0.1,lines:[[...Wd('ЗАМІСТЬ ВТОМИ —')]]},{t0:1.1,lines:[[['«ДРУГЕ',C.yel],['ДИХАННЯ».',C.yel]]]}],lt,790);
+ return s}
+
+// S5: night, window lighting up with times
+function s5(lt){let s=bgGrad('g5','#070912','#1b1420');
+ for(let i=0;i<40;i++){s+=`<circle cx="${(rnd(i)*540).toFixed(0)}" cy="${(rnd(i+50)*360).toFixed(0)}" r="${(rnd(i+9)*1.4+0.4).toFixed(1)}" fill="#fff" opacity="${(0.3+0.5*Math.abs(Math.sin(lt*2+i))).toFixed(2)}"/>`}
+ s+=`<circle cx="430" cy="150" r="40" fill="#f6e3b0"/><circle cx="414" cy="140" r="40" fill="#070912"/>`;
+ const z=1.0+lt*0.04;
+ s+=`<g transform="translate(270 560) scale(${z.toFixed(3)}) translate(-270 -560)">`;
+ s+=building(40,330,140,700,21,lt,{allOff:true,fill:'#161219'})+building(360,360,150,700,22,lt,{allOff:true,fill:'#161219'});
+ // main house
+ s+=`<rect x="170" y="280" width="200" height="720" fill="#1d1820"/><polyline points="170,1000 170,280 370,280" fill="none" stroke="#5a6c9a" stroke-width="2"/>`;
+ let k=0;for(let y=300;y<900;y+=56)for(let x=188;x<350;x+=42){k++;s+=`<rect x="${x}" y="${y}" width="26" height="34" fill="#2a2430"/>`}
+ // the child's window: blinks on at times
+ const times=[1.0,2.2,3.6];let on=0;times.forEach(t0=>{if(lt>t0&&lt<t0+0.55)on=1});
+ s+=`<rect x="272" y="524" width="26" height="34" fill="${on?C.yel:'#2a2430'}"/>`;
+ if(on)s+=`<circle cx="285" cy="541" r="46" fill="${C.yel}" opacity=".22"/>`;
+ s+=`</g>`;
+ // time badges popping near the window
+ const labels=['01:40','03:15','05:00'];
+ labels.forEach((l,i)=>{const p=(lt-times[i])/0.25;if(p>0){const red=i===2;s+=badge(120+i*150,230+(i%2)*50,l,{bg:red?C.red:'#dbe9f7',fg:red?'#fff':'#14365c',stroke:red?'#ffb0a8':'#5b8fc4',size:20,p})}});
+ s+=badge(270,140,'НІЧ',{bg:'#1d2440',fg:'#cfe0ff',stroke:'#5a6c9a',size:16,icon:'☾',p:lt/0.3});
+ s+=subs([{t0:0.1,lines:[[...Wd('А ВНОЧІ — ПРОБУДЖЕННЯ')]]},{t0:2.6,lines:[[...Wd('І ПІДЙОМ О'),['5:00.',C.red]]]}],lt,700);
+ return s}
+
+// S2b: day badge helper
+function dayBadge(n,lt){return badge(270,72,'ДЕНЬ '+n,{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:16,p:lt/0.25})}
+
+// S6: day 2 — sleep pressure snowballs, car nap
+function s6(lt){let s=bgGrad('g6','#22160f','#3a2214');
+ s+=dayBadge(2,lt);
+ s+=bigText(270,150,[['ВТОМА ',C.white],['НАКОПИЧУЄТЬСЯ',C.red]],38,(lt-0.1)/0.35);
+ // gauge
+ const fill=0.3+0.65*ease(lt/4.5);const col=fill>0.75?C.red:(fill>0.55?C.or:C.yel);
+ s+=`<text x="60" y="250" font-size="18" fill="#f3d9b0" letter-spacing="2">ТИСК СНУ</text>`;
+ s+=`<rect x="60" y="262" width="420" height="34" rx="17" fill="#120c09" stroke="#5a3a24" stroke-width="2"/>`;
+ s+=`<rect x="64" y="266" width="${(412*fill).toFixed(1)}" height="26" rx="13" fill="${col}"/>`;
+ for(let k=1;k<10;k++)s+=`<line x1="${60+42*k}" y1="300" x2="${60+42*k}" y2="308" stroke="#7a5a40" stroke-width="2"/>`;
+ s+=`<text x="${Math.min(470,64+412*fill)}" y="330" font-size="20" fill="${col}" text-anchor="end">${Math.round(fill*100)}%</text>`;
+ // snowball rolling and growing (0-3.5s)
+ if(lt<4){const p=lt/3.5;const r=18+60*ease(p);const x=-40+520*p;const rot=lt*400;
+  s+=`<g transform="translate(${x.toFixed(1)} ${(740-r).toFixed(1)}) rotate(${rot.toFixed(0)})"><circle r="${r.toFixed(1)}" fill="#efe6dc"/><path d="M ${-r*0.6} 0 q ${r*0.6} ${-r*0.4} ${r*1.1} ${-r*0.1}" stroke="#c8b8a8" stroke-width="4" fill="none"/></g>`;
+  s+=`<rect x="0" y="740" width="540" height="6" fill="#5a3a24"/>`;}
+ // car with napping child (3.6s+)
+ const cp=ease((lt-3.6)/0.6);if(cp>0){const cx=-200+460*cp+Math.sin(lt*20)*1.5;
+  s+=`<g transform="translate(${cx.toFixed(1)} 640)"><path d="M -150 60 q 0 -40 40 -46 l 40 -50 q 10 -10 30 -10 h 110 q 22 0 36 16 l 40 44 q 44 6 44 46 v 20 h -340 z" fill="#2f86c9"/>
+   <path d="M -60 -38 h 70 v 44 h -96 z M 24 -38 h 80 l 34 44 h -114 z" fill="#0e1a2c"/>
+   <circle cx="-80" cy="80" r="30" fill="#1a110c"/><circle cx="-80" cy="80" r="12" fill="#888"/><circle cx="130" cy="80" r="30" fill="#1a110c"/><circle cx="130" cy="80" r="12" fill="#888"/>
+   <circle cx="-20" cy="-8" r="16" fill="${C.skin}"/><path d="M -28 -10 q 4 3 8 0 M -16 -10 q 4 3 8 0" stroke="#3a2216" stroke-width="2" fill="none"/></g>`;
+  for(let z=0;z<3;z++){const zp=((lt*0.8+z*0.33)%1);s+=`<text x="${cx-10+zp*40+z*10}" y="${600-zp*80}" font-size="${18+z*6}" fill="#cfe0ff" opacity="${(1-zp).toFixed(2)}">z</text>`}}
+ s+=badge(400,520,'10 ХВ У МАШИНІ',{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:18,icon:'🚗',p:(lt-4.4)/0.3});
+ s+=badge(170,880,'ВЕЧІР ЗІРВАНО',{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:18,p:(lt-5.6)/0.3});
+ s+=embers(lt,12,17);return s}
+
+// S7: day 3 — exhausted mom
+function s7(lt){let s=bgGrad('g7','#1e1410','#120c09');
+ s+=`<circle cx="430" cy="260" r="120" fill="${C.red}" opacity=".08"/>`;
+ s+=dayBadge(3,lt);
+ const z=1+lt*0.02;
+ s+=`<g transform="translate(270 960) scale(${z.toFixed(3)}) translate(-270 -960)">`+mom(270,560,lt*0.5,0,true)+`</g>`;
+ // coffee cup
+ s+=`<g transform="translate(420 820)"><path d="M -40 -50 h 80 l -8 70 q -2 14 -16 14 h -32 q -14 0 -16 -14 z" fill="#f3eadb"/><path d="M 40 -36 q 26 0 26 20 q 0 20 -30 20" stroke="#f3eadb" stroke-width="8" fill="none"/><rect x="-34" y="-50" width="68" height="10" fill="#5a3510"/></g>`;
+ for(let k=0;k<3;k++){const sp=((lt*0.6+k*0.33)%1);s+=`<path d="M ${408+k*12} ${760-sp*70} q -10 -14 0 -28 q 10 -14 0 -28" stroke="#fff" stroke-width="3" fill="none" opacity="${(0.5*(1-sp)).toFixed(2)}"/>`}
+ s+=badge(130,200,'ІСТЕРИКИ',{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:18,p:(lt-0.9)/0.3});
+ s+=badge(410,170,'СОН МАМИ: 2 ГОД',{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:18,icon:'☾',p:(lt-3.6)/0.3});
+ s+=embers(lt,8,23);return s}
+
+// S8: good news — sunrise, sleeping baby, individual norm
+function s8(lt){const g=ease(lt/2.5);
+ let s=bgGrad('g8','#241a2e','#e8892c');
+ s+=`<rect width="540" height="960" fill="#120c09" opacity="${(0.55*(1-g)).toFixed(2)}"/>`;
+ const sy=520-120*g;s+=`<circle cx="270" cy="${sy}" r="130" fill="${C.yel}" opacity=".25"/><circle cx="270" cy="${sy}" r="80" fill="#ffd36a" opacity=".85"/>`;
+ s+=bigText(270,150,[['Є ',C.white],['ГАРНА НОВИНА',C.yel]],50,lt/0.35);
+ // crib
+ s+=`<g transform="translate(270 700)"><rect x="-170" y="-20" width="340" height="120" rx="10" fill="#f3eadb"/>`;
+ for(let k=-150;k<=150;k+=30)s+=`<rect x="${k-5}" y="-120" width="10" height="110" rx="4" fill="#f3eadb"/>`;
+ s+=`<rect x="-180" y="-130" width="360" height="16" rx="8" fill="#e6d6c2"/>`;
+ const br=Math.sin(lt*2)*3;
+ s+=`<circle cx="-70" cy="${-22+br*0.3}" r="34" fill="${C.skin}"/><path d="M -88 -24 q 7 5 14 0 M -66 -24 q 7 5 14 0" stroke="#3a2216" stroke-width="3" fill="none"/><path d="M -40 ${-10-br} q 110 -30 200 0 v 30 h -200 z" fill="#b0c0f0"/></g>`;
+ for(let z=0;z<3;z++){const zp=((lt*0.5+z*0.33)%1);s+=`<text x="${210+zp*60+z*14}" y="${600-zp*120}" font-size="${22+z*8}" fill="#fff" opacity="${(1-zp).toFixed(2)}">z</text>`}
+ // "not by table" badge with strike + IN badge
+ const tp=(lt-4.2)/0.3;s+=badge(150,300,'ТАБЛИЦЯ НОРМ',{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:17,p:tp});
+ if(lt>5.0){const w=ease((lt-5.0)/0.3)*150;s+=`<line x1="80" y1="300" x2="${80+w}" y2="300" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/>`}
+ s+=badge(330,380,'ІНДИВІДУАЛЬНА НОРМА',{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:20,icon:'✓',p:(lt-6.6)/0.3});
+ s+=embers(lt,10,29);return s}
+
+// S9: end card
+function s9(lt){let s=`<rect width="540" height="960" fill="#121014"/>`;
+ s+=bigText(270,390,[['ЧАСТИНА 2',C.white]],66,lt/0.3);
+ s+=`<rect x="${270-150*ease((lt-0.2)/0.3)}" y="410" width="${300*ease((lt-0.2)/0.3)}" height="5" fill="${C.red}"/>`;
+ s+=bigText(270,475,[['ЯК ПОВЕРНУТИ',C.red]],38,(lt-0.3)/0.3);
+ s+=bigText(270,520,[['ДЕННИЙ СОН?',C.red]],38,(lt-0.4)/0.3);
+ s+=`<text x="270" y="600" font-size="20" fill="#bbb" text-anchor="middle" opacity="${clamp((lt-0.7)*3)}" letter-spacing="1">ПІДПИШИСЬ, ЩОБ НЕ ПРОПУСТИТИ</text>`;
+ s+=`<text x="270" y="640" font-size="18" fill="#fff" text-anchor="middle" opacity="${clamp((lt-0.9)*3)}">@tanyadonchenko_proson</text>`;
+ return s}
+
+/* ===== PART 2 SCENES (LANG switch) ===== */
+const LANG='en';
+const TX={
+uk:{p1a:'ЧАСТИНА 2',p1b:'ЯК ПОВЕРНУТИ',p1c:'ДЕННИЙ СОН?',p1d:'ПІСЛЯ 3 ДНІВ БЕЗ СНУ',step:'КРОК',
+ s1:'ПІДЙОМ — ЯКІР',b1:'ЩОДНЯ В ОДИН ЧАС',t1:'7:00',
+ s2:'ЗА ГОДИННИКОМ',b2a:'ПОЗІХАННЯ',b2b:'НЕСПАННЯ ВІД ПІДЙОМУ',
+ s3:'ФУНДАМЕНТ',b3a:'БІЛИЙ ШУМ 50–65 ДБ',b3b:'19–22 °C',
+ s4:'БЕЗ БОРОТЬБИ',b4a:'20 ХВ',b4b:'ТИХА ГОДИНА',b4c:'СВІТЛО НЕ ВИМИКАЄМО',
+ s5:'ВІДБІЙ РАНІШЕ',b5a:'−30–45 ХВ',tA:'21:00',tB:'20:15',
+ s6:'3–4 ДНІ',b6a:'1 ДЕНЬ = ТОЧКА',b6b:'НЕ ЛІНІЯ',days:['ПН','ВТ','СР','ЧТ'],
+ p8a:'І ',p8b:'ГОЛОВНЕ',b8a:'ТАБЛИЦЯ НОРМ',b8b:'ЩОДЕННИК 5 ДНІВ',b8c:'ІНДИВІДУАЛЬНА НОРМА',
+ e1:'ХОЧЕТЕ ЗНАТИ',e2:'НОРМУ СВОЄЇ ДИТИНИ?',e3:'НАПИШІТЬ «СОН» У ДІРЕКТ',handle:'@tanyadonchenko_proson'},
+en:{p1a:'PART 2',p1b:'HOW TO BRING',p1c:'NAPS BACK?',p1d:'AFTER 3 DAYS WITHOUT NAPS',step:'STEP',
+ s1:'MORNING ANCHOR',b1:'SAME TIME EVERY DAY',t1:'7 AM',
+ s2:'GO BY THE CLOCK',b2a:'YAWNING',b2b:'AWAKE TIME FROM WAKE-UP',
+ s3:'THE BASICS',b3a:'WHITE NOISE 50–65 DB',b3b:'66–72 °F',
+ s4:'NO FIGHTING',b4a:'20 MIN',b4b:'QUIET TIME',b4c:'LIGHTS STAY ON',
+ s5:'EARLIER BEDTIME',b5a:'30–45 MIN EARLIER',tA:'9 PM',tB:'8:15 PM',
+ s6:'3–4 DAYS',b6a:'1 DAY = A DOT',b6b:'NOT A LINE',days:['MON','TUE','WED','THU'],
+ p8a:'AND ',p8b:'THE KEY THING',b8a:'SLEEP CHART',b8b:'5-DAY SLEEP DIARY',b8c:'INDIVIDUAL NORM',
+ e1:'WANT TO KNOW',e2:"YOUR CHILD'S NORM?",e3:'MESSAGE ME ON WHATSAPP',handle:'@donchenkode'}}[LANG];
+function stepHead(n,title,lt){return bigText(270,150,[[TX.step+' '+n+' · ',C.red],[title,C.white]],38,(lt-0.05)/0.35)}
+function p1(lt){const z=1+lt*0.025;let s=bgGrad('q1','#0f0b0a','#3a2214');
+ s+=`<circle cx="460" cy="350" r="26" fill="#f6e3b0" opacity=".85"/>`;
+ s+=`<g transform="translate(270 960) scale(${z}) translate(-270 -960)">`;
+ s+=`<g opacity=".55">`+[[0,420,100],[95,380,90],[180,460,80],[255,400,110],[360,440,90],[445,390,100]].map((b,i)=>building(b[0],b[1],b[2],600,40+i,lt,{edge:false,fill:'#1d1410'})).join('')+`</g>`;
+ s+=building(30,470,150,520,3,lt,{})+building(350,430,170,560,5,lt,{flick:true})+building(190,380,150,620,9,lt,{});
+ s+=`<rect x="248" y="520" width="34" height="40" fill="${C.yel}" opacity="${0.6+0.4*Math.sin(lt*6)}"/></g>`;
+ s+=`<rect y="860" width="540" height="100" fill="#120c09"/>`+embers(lt,22,3);
+ s+=bigText(270,140,[[TX.p1a,C.red]],56,lt/0.35);
+ s+=bigText(270,205,[[TX.p1b,C.white]],48,(lt-0.15)/0.35);
+ s+=bigText(270,262,[[TX.p1c,C.yel]],52,(lt-0.3)/0.35);
+ s+=badge(270,320,TX.p1d,{icon:'⚠',p:(lt-0.7)/0.3});return s}
+function alarmClock(cx,cy,r,hrsAngle,minAngle,shake){let s=`<g transform="translate(${cx+shake} ${cy}) rotate(${shake*0.6})">`;
+ s+=`<circle cx="${-r*0.7}" cy="${-r*0.85}" r="${r*0.28}" fill="${C.red}"/><circle cx="${r*0.7}" cy="${-r*0.85}" r="${r*0.28}" fill="${C.red}"/>`;
+ s+=`<line x1="${-r*0.6}" y1="${r*0.85}" x2="${-r*0.8}" y2="${r*1.1}" stroke="#2a1d15" stroke-width="10" stroke-linecap="round"/><line x1="${r*0.6}" y1="${r*0.85}" x2="${r*0.8}" y2="${r*1.1}" stroke="#2a1d15" stroke-width="10" stroke-linecap="round"/>`;
+ s+=`<circle r="${r+10}" fill="${C.red}"/><circle r="${r}" fill="#f3eadb"/>`;
+ for(let i=0;i<12;i++){const a=i*Math.PI/6;s+=`<line x1="${(Math.sin(a)*(r-10)).toFixed(1)}" y1="${(-Math.cos(a)*(r-10)).toFixed(1)}" x2="${(Math.sin(a)*(r-24)).toFixed(1)}" y2="${(-Math.cos(a)*(r-24)).toFixed(1)}" stroke="#3a2a20" stroke-width="${i%3?3:6}" stroke-linecap="round"/>`}
+ const hand=(ang,len,w,col)=>`<line x1="0" y1="0" x2="${(Math.sin(ang*Math.PI/180)*len).toFixed(1)}" y2="${(-Math.cos(ang*Math.PI/180)*len).toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+ s+=hand(hrsAngle,r*0.5,10,'#2a1d15')+hand(minAngle,r*0.75,6,C.red)+`<circle r="9" fill="#2a1d15"/></g>`;return s}
+function p2(lt){const g=ease(lt/2);let s=bgGrad('q2','#241a2e','#e8892c');
+ s+=`<rect width="540" height="960" fill="#120c09" opacity="${(0.6*(1-g)).toFixed(2)}"/>`;
+ s+=`<circle cx="270" cy="${760-160*g}" r="110" fill="${C.yel}" opacity=".3"/>`;
+ s+=`<rect y="760" width="540" height="200" fill="#1a110c"/>`;
+ const ring=(lt>1.0&&lt<2.6)?Math.sin(lt*60)*6:0;
+ s+=alarmClock(270,500,130,210,0,ring);
+ if(ring)for(let k=0;k<3;k++)s+=`<path d="M ${120-k*16} ${420+k*10} q -14 30 0 60 M ${420+k*16} ${420+k*10} q 14 30 0 60" stroke="#fff" stroke-width="4" fill="none" opacity=".6"/>`;
+ s+=stepHead(1,TX.s1,lt);
+ s+=badge(270,230,TX.t1,{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:26,icon:'⏰',p:(lt-0.6)/0.3});
+ s+=badge(270,860,TX.b1,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:20,p:(lt-2.6)/0.3});
+ s+=embers(lt,8,5);return s}
+function p3(lt){let s=bgGrad('q3','#22160f','#3b2416');
+ s+=stepHead(2,TX.s2,lt);
+ const sweep=ease(lt/4.5)*300;
+ const cx=270,cy=470,R=150;
+ s+=`<circle cx="${cx}" cy="${cy}" r="${R+14}" fill="#2f86c9"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="#f3eadb"/>`;
+ // arc of awake time
+ const a0=-90,a1=a0+sweep;const P=a=>[cx+Math.cos(a*Math.PI/180)*(R-20),cy+Math.sin(a*Math.PI/180)*(R-20)];const [x0,y0]=P(a0),[x1,y1]=P(a1);
+ s+=`<path d="M ${cx} ${cy} L ${x0.toFixed(1)} ${y0.toFixed(1)} A ${R-20} ${R-20} 0 ${sweep>180?1:0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${C.or}" opacity=".45"/>`;
+ s+=`<line x1="${cx}" y1="${cy}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${C.red}" stroke-width="6" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="10" fill="#2a1d15"/>`;
+ s+=badge(150,720,TX.b2a,{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:18,icon:'🥱',p:(lt-0.8)/0.3});
+ if(lt>1.8){const w=ease((lt-1.8)/0.3)*170;s+=`<line x1="65" y1="720" x2="${65+w}" y2="720" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/>`;}
+ s+=badge(330,800,TX.b2b,{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:19,icon:'✓',p:(lt-2.6)/0.3});
+ s+=embers(lt,10,9);return s}
+function crib(cx,cy,lt,sc=1){let s=`<g transform="translate(${cx} ${cy}) scale(${sc})"><rect x="-170" y="-20" width="340" height="120" rx="10" fill="#f3eadb"/>`;
+ for(let k=-150;k<=150;k+=30)s+=`<rect x="${k-5}" y="-120" width="10" height="110" rx="4" fill="#f3eadb"/>`;
+ s+=`<rect x="-180" y="-130" width="360" height="16" rx="8" fill="#e6d6c2"/>`;const br=Math.sin(lt*2)*3;
+ s+=`<circle cx="-70" cy="${-22+br*0.3}" r="34" fill="${C.skin}"/><path d="M -88 -24 q 7 5 14 0 M -66 -24 q 7 5 14 0" stroke="#3a2216" stroke-width="3" fill="none"/><path d="M -40 ${-10-br} q 110 -30 200 0 v 30 h -200 z" fill="#b0c0f0"/></g>`;return s}
+function p4(lt){let s=bgGrad('q4','#0b0d18','#1b1626');
+ s+=stepHead(3,TX.s3,lt);
+ s+=`<rect x="330" y="230" width="150" height="190" rx="6" fill="#0e1a2c" stroke="#3a3f5a" stroke-width="4"/><line x1="405" y1="230" x2="405" y2="420" stroke="#3a3f5a" stroke-width="4"/>`;
+ s+=crib(250,650,lt,1);
+ // white noise machine + waves
+ s+=`<g transform="translate(90 600)"><rect x="-40" y="-30" width="80" height="60" rx="18" fill="#dbe9f7"/><circle r="16" fill="#9fb4d8"/></g>`;
+ for(let k=0;k<4;k++){const ph=((lt*0.7+k*0.25)%1);s+=`<path d="M ${140+ph*60} ${560} q 18 40 0 80" stroke="#cfe0ff" stroke-width="4" fill="none" opacity="${(1-ph).toFixed(2)}"/>`}
+ for(let z=0;z<3;z++){const zp=((lt*0.5+z*0.33)%1);s+=`<text x="${180+zp*50+z*14}" y="${520-zp*100}" font-size="${20+z*8}" fill="#cfe0ff" opacity="${(1-zp).toFixed(2)}">z</text>`}
+ s+=badge(150,300,TX.b3a,{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:17,icon:'♪',p:(lt-1.2)/0.3});
+ s+=badge(400,860,TX.b3b,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:20,icon:'🌡',p:(lt-3.0)/0.3});
+ return s}
+function p5(lt){let s=bgGrad('q5','#2b1a12','#1a110c');
+ s+=`<circle cx="450" cy="300" r="110" fill="${C.or}" opacity=".15"/>`;
+ s+=stepHead(4,TX.s4,lt);
+ const z=1+lt*0.02;s+=`<g transform="translate(270 960) scale(${z.toFixed(3)}) translate(-270 -960)">`+mom(270,600,lt*0.6,-0.55)+`</g>`;
+ s+=badge(110,250,TX.b4a,{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:20,icon:'⏱',p:(lt-0.6)/0.3});
+ s+=badge(380,240,TX.b4b,{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:20,icon:'☕',p:(lt-2.8)/0.3});
+ s+=badge(270,880,TX.b4c,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:18,icon:'💡',p:(lt-4.2)/0.3});
+ s+=embers(lt,8,13);return s}
+function p6(lt){let s=bgGrad('q6','#0c0b16','#24182a');
+ for(let i=0;i<30;i++){s+=`<circle cx="${(rnd(i)*540).toFixed(0)}" cy="${(rnd(i+50)*360).toFixed(0)}" r="${(rnd(i+9)*1.4+0.4).toFixed(1)}" fill="#fff" opacity="${(0.3+0.5*Math.abs(Math.sin(lt*2+i))).toFixed(2)}"/>`}
+ s+=stepHead(5,TX.s5,lt);
+ const m=ease((lt-1.6)/2.0);const ang=-m*45*6;// minute hand back 45 min
+ s+=alarmClock(270,480,120,630+ang/12*1,ang,0);
+ s+=badge(150,700,TX.tA,{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:22,p:(lt-0.6)/0.3});
+ if(lt>1.4){const w=ease((lt-1.4)/0.3)*90;s+=`<line x1="105" y1="700" x2="${105+w}" y2="700" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/>`}
+ s+=badge(390,700,TX.tB,{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:24,icon:'✓',p:(lt-3.4)/0.3});
+ s+=badge(270,800,TX.b5a,{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:20,p:(lt-4.4)/0.3});
+ return s}
+function p7(lt){let s=bgGrad('q7','#22160f','#3a2214');
+ s+=stepHead(6,TX.s6,lt);
+ const x0=60,w=96,g=12;
+ TX.days.forEach((d,i)=>{const p=ease((lt-0.5-i*0.6)/0.3);const x=x0+i*(w+g);
+  s+=`<g opacity="${p.toFixed(2)}"><rect x="${x}" y="300" width="${w}" height="150" rx="12" fill="#f3eadb"/><rect x="${x}" y="300" width="${w}" height="36" rx="12" fill="${C.red}"/><text x="${x+w/2}" y="326" font-size="18" fill="#fff" text-anchor="middle">${d}</text>`;
+  const bad=i===1;s+=bad?`<circle cx="${x+w/2}" cy="${395}" r="20" fill="${C.red}"/>`:`<path d="M ${x+28} 395 l 14 14 l 26 -30" stroke="#2f9e57" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;s+=`</g>`});
+ // line chart trending up with one dip
+ const pts=[[80,700],[180,740],[280,660],[380,630],[470,600]];const n=ease((lt-3.4)/1.6)*(pts.length-1);
+ let d=`M ${pts[0][0]} ${pts[0][1]}`;for(let i=1;i<=Math.floor(n);i++)d+=` L ${pts[i][0]} ${pts[i][1]}`;
+ const fi=Math.floor(n),fr=n-fi;if(fi<pts.length-1){const a=pts[fi],b=pts[fi+1];d+=` L ${a[0]+(b[0]-a[0])*fr} ${a[1]+(b[1]-a[1])*fr}`}
+ if(lt>3.4)s+=`<path d="${d}" stroke="${C.yel}" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+ if(lt>3.8)s+=`<circle cx="180" cy="740" r="10" fill="${C.red}"/>`;
+ s+=badge(170,820,TX.b6a,{bg:C.red,fg:'#fff',stroke:'#ffb0a8',size:18,p:(lt-4.4)/0.3});
+ s+=badge(400,820,TX.b6b,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:18,p:(lt-5.2)/0.3});
+ s+=embers(lt,8,21);return s}
+function p8(lt){const g=ease(lt/2.5);let s=bgGrad('q8','#241a2e','#e8892c');
+ s+=`<rect width="540" height="960" fill="#120c09" opacity="${(0.55*(1-g)).toFixed(2)}"/>`;
+ const sy=520-120*g;s+=`<circle cx="270" cy="${sy}" r="130" fill="${C.yel}" opacity=".25"/><circle cx="270" cy="${sy}" r="80" fill="#ffd36a" opacity=".85"/>`;
+ s+=bigText(270,150,[[TX.p8a,C.white],[TX.p8b,C.yel]],46,lt/0.35);
+ s+=crib(270,700,lt,1);
+ for(let z=0;z<3;z++){const zp=((lt*0.5+z*0.33)%1);s+=`<text x="${210+zp*60+z*14}" y="${600-zp*120}" font-size="${22+z*8}" fill="#fff" opacity="${(1-zp).toFixed(2)}">z</text>`}
+ s+=badge(150,270,TX.b8a,{bg:'#dbe9f7',fg:'#14365c',stroke:'#5b8fc4',size:17,p:(lt-2.0)/0.3});
+ if(lt>2.8){const w=ease((lt-2.8)/0.3)*150;s+=`<line x1="80" y1="270" x2="${80+w}" y2="270" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/>`}
+ s+=badge(370,340,TX.b8b,{bg:'#fff3d6',fg:'#5a3510',stroke:C.or,size:18,icon:'📓',p:(lt-3.6)/0.3});
+ s+=badge(270,420,TX.b8c,{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:22,icon:'✓',p:(lt-6.0)/0.3});
+ s+=embers(lt,10,29);return s}
+function p9(lt){let s=`<rect width="540" height="960" fill="#121014"/>`;
+ s+=bigText(270,400,[[TX.e1,C.white]],44,lt/0.3);
+ s+=bigText(270,455,[[TX.e2,C.white]],40,(lt-0.15)/0.3);
+ s+=`<rect x="${270-160*ease((lt-0.3)/0.3)}" y="480" width="${320*ease((lt-0.3)/0.3)}" height="5" fill="${C.red}"/>`;
+ s+=badge(270,540,TX.e3,{bg:C.yel,fg:'#3a2208',stroke:'#fff3d6',size:22,p:(lt-0.5)/0.3});
+ s+=`<text x="270" y="620" font-size="18" fill="#fff" text-anchor="middle" opacity="${clamp((lt-0.9)*3)}">${TX.handle}</text>`;return s}
+
+/* ===== REEL CONFIG ===== */
+const SCENES=[[p1,4.0],[p2,6.4],[p3,5.6],[p4,5.6],[p5,7.2],[p6,7.8],[p7,7.6],[p8,8.2],[p9,3.6]];
+window.SUBS=false;
+const ST=[];SCENES.reduce((a,b)=>{ST.push(a);return a+b[1]},0);
+const _T=SCENES.reduce((a,b)=>a+b[1],0);
+const R=(i,t)=>ST[i]+t;
+window.SFX=[{t:0,name:'drone',vol:.2,dur:_T}];
+ST.slice(1).forEach(t=>window.SFX.push({t:t-0.15,name:'whoosh',vol:.55}));
+window.SFX.push(
+ {t:0,name:'crickets',vol:.18,dur:4},{t:0.02,name:'boom',vol:.5},{t:0.75,name:'pop',vol:.5},
+ {t:R(1,0.6),name:'pop',vol:.5},{t:R(1,1.0),name:'alarm',vol:.4},{t:R(1,1.9),name:'alarm',vol:.3},{t:R(1,2.6),name:'pop',vol:.45},{t:R(1,3.0),name:'clock_ticking',vol:.3,dur:3.2},
+ {t:R(2,0),name:'clock_fast',vol:.4},{t:R(2,0.8),name:'pop',vol:.45},{t:R(2,1.8),name:'click',vol:.6},{t:R(2,2.6),name:'ding',vol:.5},
+ {t:R(3,0),name:'wind',vol:.25,dur:5.6},{t:R(3,1.2),name:'pop',vol:.45},{t:R(3,3.0),name:'pop',vol:.45},
+ {t:R(4,0.6),name:'pop',vol:.45},{t:R(4,0.7),name:'clock_ticking',vol:.3,dur:2},{t:R(4,2.8),name:'pop',vol:.45},{t:R(4,4.2),name:'switch',vol:.5},
+ {t:R(5,0),name:'crickets',vol:.4,dur:7.8},{t:R(5,0.6),name:'pop',vol:.45},{t:R(5,1.4),name:'click',vol:.6},{t:R(5,1.6),name:'clock_fast',vol:.35},{t:R(5,3.4),name:'ding',vol:.5},{t:R(5,4.4),name:'pop',vol:.45},
+ {t:R(6,0.5),name:'pop',vol:.4},{t:R(6,1.1),name:'pop',vol:.4},{t:R(6,1.7),name:'pop',vol:.4},{t:R(6,2.3),name:'pop',vol:.4},{t:R(6,3.4),name:'riser',vol:.35},{t:R(6,4.4),name:'pop',vol:.45},{t:R(6,5.2),name:'pop',vol:.45},
+ {t:R(7,0.1),name:'ding',vol:.5},{t:R(7,2.0),name:'pop',vol:.45},{t:R(7,2.8),name:'click',vol:.6},{t:R(7,3.6),name:'pop',vol:.45},{t:R(7,6.0),name:'ding',vol:.55},{t:R(7,6.05),name:'pop',vol:.5},
+ {t:R(8,0.02),name:'boom',vol:.5},{t:R(8,0.5),name:'pop',vol:.5});
+const TOTAL=SCENES.reduce((a,b)=>a+b[1],0);
+const XF=0.18;
+function frame(t){let acc=0,out='';
+ for(let i=0;i<SCENES.length;i++){const [fn,d]=SCENES[i];const st=acc;acc+=d;
+  if(t>=st&&t<acc){out=`<g>${fn(t-st)}</g>`;
+   // crossfade into next scene during last XF secs
+   if(i<SCENES.length-1&&t>acc-XF){const p=(t-(acc-XF))/XF;const sc=1.08-0.08*p;out+=`<g opacity="${p.toFixed(3)}" transform="translate(270 480) scale(${sc.toFixed(3)}) translate(-270 -480)">${SCENES[i+1][0](0)}</g>`}
+   break}}
+ out+=vignette();
+ if(t<TOTAL-2.2)out+=handle();
+ document.getElementById('s').innerHTML=out}
+window.TOTAL=TOTAL;window.frame=frame;frame(0.9);
+window.FPS=30;
+</script></body></html>
