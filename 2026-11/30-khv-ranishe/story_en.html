@@ -1,0 +1,221 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-latin-800-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF,U+26A0}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-cyrillic-900-normal.woff2);unicode-range:U+0400-04FF}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-latin-900-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF}
+html,body{margin:0;background:#120d0a;overflow:hidden}
+#s{width:540px;height:960px;display:block}
+text{font-family:RC,sans-serif;font-weight:800}
+</style></head><body>
+<svg id="m" width="10" height="10" style="position:absolute;left:-9999px"></svg><svg id="s" viewBox="0 0 540 960" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const W=540,H=960;
+const C={bg:'#0b1626',bg2:'#13243b',bld:'#0f1d31',bldEdge:'#2ec4b6',win:'#ffd28a',winOff:'#1a2c45',or:'#2ec4b6',red:'#ff6b5b',yel:'#ffd166',white:'#ffffff',bp:'#0d2744',bpLine:'#2ec4b6',skin:'#e8b48c',skinD:'#c9906a',hair:'#2b2320',hood:'#3a5a7a',teal:'#2ec4b6',navy:'#0b1626'};
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>{x=clamp(x);return 1-Math.pow(1-x,3)};
+const back=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+
+/* ---------- shared pieces ---------- */
+function bgGrad(id,top,bot){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs><rect width="540" height="960" fill="url(#${id})"/>`}
+function embers(t,n=26,seed=1){let s='';for(let i=0;i<n;i++){const sp=20+rnd(i+seed)*40;const x=(rnd(i*3+seed)*W+Math.sin(t*1.3+i)*14)%W;const y=H-((rnd(i*7+seed)*H+t*sp)%H);const r=0.8+rnd(i*5+seed)*1.8;const o=0.35+0.5*Math.abs(Math.sin(t*2+i));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#8fe9df" opacity="${o.toFixed(2)}"/>`}return s}
+function building(x,y,w,h,seed,t,opts={}){let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fill||C.bld}"/>`;
+ if(opts.edge!==false)s+=`<polyline points="${x},${y+h} ${x},${y} ${x+w},${y}" fill="none" stroke="${C.bldEdge}" stroke-width="2" opacity=".85"/>`;
+ const cw=opts.cw||10,ch=opts.ch||13,gx=opts.gx||8,gy=opts.gy||10;let k=0;
+ for(let yy=y+14;yy<y+h-20;yy+=ch+gy){for(let xx=x+10;xx<x+w-cw-4;xx+=cw+gx){k++;const r=rnd(seed*100+k);let on=r>0.62;
+   if(opts.flick&&rnd(seed*31+k)>0.9)on=Math.sin(t*3+k)>0;
+   if(opts.allOff)on=false;
+   s+=`<rect x="${xx}" y="${yy}" width="${cw}" height="${ch}" fill="${on?C.win:C.winOff}" opacity="${on?0.95:0.8}"/>`}}
+ return s}
+function skyline(t,seed,baseY,opts={}){let s='';const items=[[-10,240,90],[70,330,70],[130,180,110],[230,290,80],[300,220,120],[410,310,70],[470,200,90]];
+ items.forEach((b,i)=>{s+=building(b[0],baseY-b[2]-b[1]*0+0-b[1]+b[2],b[2],b[1]+200,seed+i,t,opts)});return s}
+function badge(cx,cy,label,{bg='#dbe9f7',fg='#14365c',size=15,icon='',p=1,stroke='#5b8fc4'}={}){
+ const sc=back(p);const w=label.length*size*0.56+(icon?size*1.4:0)+26;
+ return `<g transform="translate(${cx} ${cy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*3).toFixed(2)}"><rect x="${-w/2}" y="${-size*1.1}" width="${w}" height="${size*2.2}" rx="7" fill="${bg}" stroke="${stroke}" stroke-width="2"/><text x="0" y="${size*0.38}" font-size="${size}" fill="${fg}" text-anchor="middle" letter-spacing=".5">${icon?icon+' ':''}${label}</text></g>`}
+function bigText(x,y,parts,size,p=1,anchor='middle'){const sc=0.6+0.4*back(p);let spans=parts.map(([tx,col])=>`<tspan fill="${col}">${tx}</tspan>`).join('');
+ return `<g transform="translate(${x} ${y}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2.5).toFixed(2)}"><text x="0" y="0" font-size="${size}" font-weight="900" text-anchor="${anchor}" stroke="#000" stroke-width="${size*0.12}" stroke-linejoin="round" paint-order="stroke" letter-spacing="1">${spans}</text></g>`}
+
+/* subtitle: chunk = [[word,color],...]; words pop in sequentially */
+function subtitle(lines,lt,y=640){let s='';const all=lines.flat();let idx=0;
+ lines.forEach((line,li)=>{const size=30;const yy=y+li*36;
+   // measure approx positions
+   const widths=line.map(([w])=>measure(w,size)+size*0.3);const total=widths.reduce((a,b)=>a+b,0);let x=W/2-total/2;
+   line.forEach(([w,col],wi)=>{const p=clamp((lt-idx*0.09)/0.18);idx++;const cx=x+widths[wi]/2;x+=widths[wi];
+     if(p<=0)return;const sc=0.7+0.3*back(p);
+     s+=`<g transform="translate(${cx.toFixed(1)} ${yy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2).toFixed(2)}"><text x="0" y="0" font-size="${size}" text-anchor="middle" fill="${col||'#fff'}" stroke="#000" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${w}</text></g>`})});
+ return s}
+const _mc={};function measure(w,size){const k=w+'|'+size;if(_mc[k])return _mc[k];const svg=document.getElementById('m');svg.innerHTML=`<text font-size="${size}" style="font-family:RC;font-weight:800">${w}</text>`;const v=svg.firstChild.getComputedTextLength();_mc[k]=v;return v}
+const Wd=(str,col)=>str.split(' ').map(w=>[w,col]);
+function subs(chunks,lt,y){ // chunks: [{t0,lines}]
+ if(!window.SUBS)return '';
+ let cur=null;for(const c of chunks)if(lt>=c.t0)cur=c;if(!cur)return '';return subtitle(cur.lines,lt-cur.t0,y)}
+function vignette(){return `<defs><radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient></defs><rect width="540" height="960" fill="url(#vg)"/>`}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">@donchenkode</text>`}
+
+/* ---------- scenes: «30 хвилин раніше» · palette B · hero dad + 4-month baby · device battery ---------- */
+function stars(lt,n=40){let s='';for(let i=0;i<n;i++){s+=`<circle cx="${(rnd(i)*540).toFixed(0)}" cy="${(rnd(i+50)*420).toFixed(0)}" r="${(rnd(i+9)*1.4+0.4).toFixed(1)}" fill="#cfe9ff" opacity="${(0.25+0.5*Math.abs(Math.sin(lt*2+i))).toFixed(2)}"/>`}return s}
+// dad: short dark hair, beard, teal hoodie; holds baby bundle. expr 0 calm .. 1 tired/worried
+function dad(cx,cy,lt,expr,smile=0){let s='';const bob=Math.sin(lt*3)*2;
+ s+=`<g transform="translate(${cx} ${cy+bob})">`;
+ s+=`<path d="M -170 360 q 0 -170 170 -180 q 170 10 170 180 z" fill="${C.hood}"/>`;
+ s+=`<rect x="-26" y="118" width="52" height="64" fill="${C.skinD}"/>`;
+ s+=`<ellipse cx="0" cy="10" rx="98" ry="112" fill="${C.skin}"/>`;
+ s+=`<ellipse cx="-100" cy="16" rx="14" ry="22" fill="${C.skinD}"/><ellipse cx="100" cy="16" rx="14" ry="22" fill="${C.skinD}"/>`;
+ s+=`<path d="M -100 -10 q -6 -110 100 -118 q 106 8 100 118 q -20 -60 -100 -66 q -80 6 -100 66 z" fill="${C.hair}"/>`;
+ s+=`<path d="M -88 40 q 0 100 88 110 q 88 -10 88 -110 q -20 50 -88 54 q -68 -4 -88 -54 z" fill="${C.hair}" opacity=".9"/>`;
+ const blink=(lt%2.1>2.0)?0.15:1;const lid=expr*12;
+ s+=`<ellipse cx="-38" cy="4" rx="20" ry="${22*blink}" fill="#fff"/><ellipse cx="38" cy="4" rx="20" ry="${22*blink}" fill="#fff"/>`;
+ if(blink>0.5)s+=`<circle cx="-36" cy="8" r="9" fill="#1d1612"/><circle cx="40" cy="8" r="9" fill="#1d1612"/>`;
+ s+=`<rect x="-60" y="${-20}" width="44" height="${lid+2}" fill="${C.skin}"/><rect x="16" y="${-20}" width="44" height="${lid+2}" fill="${C.skin}"/>`;
+ const br=-expr*6;
+ s+=`<path d="M -62 ${-28+br} q 22 ${-10+expr*14} 44 ${-2+expr*6}" stroke="${C.hair}" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M 62 ${-28+br} q -22 ${-10+expr*14} -44 ${-2+expr*6}" stroke="${C.hair}" stroke-width="8" fill="none" stroke-linecap="round"/>`;
+ s+=`<path d="M -54 36 q 16 ${8+expr*8} 32 0" stroke="${C.skinD}" stroke-width="4" fill="none"/><path d="M 22 36 q 16 ${8+expr*8} 32 0" stroke="${C.skinD}" stroke-width="4" fill="none"/>`;
+ s+=`<path d="M 0 26 q -8 22 6 26" stroke="${C.skinD}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+ const m=smile-expr;s+=`<path d="M -26 80 q 26 ${m*20} 52 0" stroke="#7a2a25" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+ s+=`</g>`;return s}
+function baby(cx,cy,sc,lt,{asleep=true,cry=0}={}){let s=`<g transform="translate(${cx} ${cy}) scale(${sc})">`;
+ s+=`<ellipse cx="0" cy="40" rx="70" ry="46" fill="#f4efe6"/><path d="M -70 40 q 70 40 140 0" stroke="#d8cfc0" stroke-width="4" fill="none"/>`;
+ s+=`<circle cx="0" cy="-10" r="44" fill="${C.skin}"/><path d="M -30 -40 q 30 -24 60 0" stroke="#7a5a44" stroke-width="5" fill="none"/>`;
+ if(asleep){s+=`<path d="M -22 -10 q 8 6 16 0 M 6 -10 q 8 6 16 0" stroke="#3a2a20" stroke-width="4" fill="none" stroke-linecap="round"/>`;s+=`<circle cx="0" cy="12" r="4" fill="#c97a6a"/>`}
+ else{s+=`<circle cx="-14" cy="-10" r="6" fill="#1d1612"/><circle cx="14" cy="-10" r="6" fill="#1d1612"/>`;
+  s+= cry>0?`<ellipse cx="0" cy="16" rx="${10+cry*4}" ry="${8+cry*6+Math.sin(lt*20)*2}" fill="#7a2a25"/>`:`<circle cx="0" cy="14" r="4" fill="#c97a6a"/>`}
+ s+=`<circle cx="-26" cy="6" r="8" fill="#ff9a8a" opacity=".4"/><circle cx="26" cy="6" r="8" fill="#ff9a8a" opacity=".4"/>`;
+ s+=`</g>`;return s}
+function battery(cx,cy,level,sc=1,lt=0){const col=level>0.6?C.teal:level>0.3?C.yel:C.red;let s=`<g transform="translate(${cx} ${cy}) scale(${sc})">`;
+ s+=`<rect x="-110" y="-56" width="220" height="112" rx="18" fill="#0a1220" stroke="#cfe9ff" stroke-width="8"/><rect x="112" y="-22" width="20" height="44" rx="6" fill="#cfe9ff"/>`;
+ const w=196*clamp(level);s+=`<rect x="-98" y="-44" width="${w.toFixed(1)}" height="88" rx="10" fill="${col}"/>`;
+ if(level<0.35)s+=`<rect x="-98" y="-44" width="${w.toFixed(1)}" height="88" rx="10" fill="#fff" opacity="${(0.25*Math.abs(Math.sin(lt*8))).toFixed(2)}"/>`;
+ s+=`<text x="0" y="16" font-size="46" font-weight="900" fill="#fff" text-anchor="middle" stroke="#0a1220" stroke-width="6" paint-order="stroke">${Math.round(level*100)}%</text></g>`;return s}
+function clockFace(cx,cy,R,minA,hourA){let s=`<g transform="translate(${cx} ${cy})"><circle r="${R+14}" fill="${C.teal}"/><circle r="${R+6}" fill="#13243b"/><circle r="${R}" fill="#eef6fb"/>`;
+ for(let i=0;i<12;i++){const a=i*Math.PI/6;const r1=R-12,r2=R-(i%3?24:32);s+=`<line x1="${(Math.sin(a)*r1).toFixed(1)}" y1="${(-Math.cos(a)*r1).toFixed(1)}" x2="${(Math.sin(a)*r2).toFixed(1)}" y2="${(-Math.cos(a)*r2).toFixed(1)}" stroke="#13243b" stroke-width="${i%3?3:6}" stroke-linecap="round"/>`}
+ s+=`<line x1="0" y1="0" x2="${(Math.sin(hourA)*R*0.5).toFixed(1)}" y2="${(-Math.cos(hourA)*R*0.5).toFixed(1)}" stroke="#13243b" stroke-width="10" stroke-linecap="round"/>`;
+ s+=`<line x1="0" y1="0" x2="${(Math.sin(minA)*R*0.78).toFixed(1)}" y2="${(-Math.cos(minA)*R*0.78).toFixed(1)}" stroke="${C.red}" stroke-width="6" stroke-linecap="round"/><circle r="10" fill="#13243b"/></g>`;return s}
+function crib(cx,cy,sc=1){let s=`<g transform="translate(${cx} ${cy}) scale(${sc})" stroke="#8fb3d9" stroke-width="6" fill="none"><rect x="-150" y="-40" width="300" height="130" rx="10" fill="#13243b"/>`;
+ for(let x=-130;x<=130;x+=26)s+=`<line x1="${x}" y1="-40" x2="${x}" y2="90"/>`;s+=`<line x1="-160" y1="90" x2="-160" y2="140"/><line x1="160" y1="90" x2="160" y2="140"/></g>`;return s}
+
+// S1 hook: clock jumps back 30 min
+function s1(lt){let s=bgGrad('g1','#060d18','#13243b')+stars(lt,30);
+ const jump=lt<1.6?0:ease((lt-1.6)/0.35);const shake=lt>1.6&&lt<2.0?Math.sin(lt*80)*4:0;
+ const minA=(Math.PI)-jump*Math.PI;const hourA=(19.5-jump*0.5)/12*2*Math.PI;
+ s+=`<g transform="translate(${shake} 0)">`+clockFace(270,470,150,minA,hourA)+`</g>`;
+ if(lt>1.6){for(let i=0;i<3;i++){const o=clamp(1-(lt-1.6-i*0.12)*1.2);s+=`<path d="M ${130-i*14} ${360+i*10} a 160 160 0 0 0 0 220" stroke="${C.teal}" stroke-width="5" fill="none" opacity="${o.toFixed(2)}"/>`}}
+ s+=badge(270,700,'−30 MIN',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:28,p:(lt-1.7)/0.3});
+ s+=embers(lt,16,3);
+ s+=bigText(270,140,[['30 MINUTES ',C.red],['EARLIER.',C.white]],46,lt/0.35);
+ s+=bigText(270,205,[['EVERY DAY. ',C.white],['WHAT HAPPENS?',C.yel]],38,(lt-0.15)/0.35);
+ s+=badge(270,275,'HYPOTHETICAL SCENARIO',{icon:'⚠',bg:'#dff6f3',fg:'#0b3a36',stroke:C.teal,p:(lt-0.5)/0.3});
+ s+=badge(270,800,'«SO HE’S NOT OVERTIRED»',{bg:'#13243b',fg:C.yel,stroke:C.yel,size:18,p:(lt-3.2)/0.3});
+ return s}
+// S2 day 1: dad happy, baby falls asleep fast
+function s2(lt){let s=bgGrad('g2','#13243b','#0b1626');
+ s+=`<rect x="360" y="110" width="140" height="200" rx="8" fill="#ffd28a" opacity=".18"/><circle cx="90" cy="260" r="120" fill="${C.teal}" opacity=".08"/>`;
+ const z=1+lt*0.02;s+=`<g transform="translate(270 960) scale(${z.toFixed(3)}) translate(-270 -960)">`+dad(270,500,lt,0,ease((lt-1.0)/0.5))+baby(270,790,1.1,lt)+`</g>`;
+ for(let i=0;i<3;i++){const p=clamp((lt-0.6-i*0.4)/0.8);if(p>0)s+=`<text x="${360+i*26}" y="${720-p*90-i*20}" font-size="${26+i*6}" fill="#cfe9ff" opacity="${(1-p).toFixed(2)}">z</text>`}
+ s+=badge(270,120,'DAY 1',{bg:'#dff6f3',fg:'#0b3a36',stroke:C.teal,size:24,p:lt/0.3});
+ s+=badge(270,190,'ASLEEP IN 3 MIN',{bg:C.teal,fg:'#062a27',stroke:'#bff3ee',size:18,icon:'✓',p:(lt-1.2)/0.3});
+ return s}
+// S3 battery 50%: short sleep
+function s3(lt){let s=bgGrad('g3','#0b1626','#152a44');
+ s+=crib(270,720,1.1)+baby(270,700,0.9,lt,{asleep:lt<1.8});
+ const lvl=0.05+0.45*ease((lt-0.3)/1.6);
+ s+=battery(270,430,lvl,1.15,lt);
+ if(lt>1.8){const p=clamp((lt-1.8)/0.3);s+=`<text x="270" y="600" font-size="40" fill="${C.yel}" text-anchor="middle" opacity="${p}">!</text>`}
+ s+=badge(150,250,'30 MIN',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:22,icon:'⏱',p:(lt-0.6)/0.3});
+ s+=badge(390,250,'CHARGED 50%',{bg:'#13243b',fg:C.yel,stroke:C.yel,size:20,p:(lt-2.6)/0.3});
+ s+=bigText(270,150,[['A SHORT ',C.white],['NAP',C.red]],56,lt/0.35);
+ return s}
+// S4 evening kitchen: dad carries fussy baby
+function s4(lt){let s=bgGrad('g4','#13243b','#0e1b2e');
+ s+=`<rect x="0" y="560" width="540" height="40" fill="#1f3654"/><rect x="40" y="380" width="120" height="180" fill="#1a2c45"/><rect x="380" y="380" width="120" height="180" fill="#1a2c45"/>`;
+ s+=`<rect x="200" y="140" width="150" height="190" rx="6" fill="#071020"/><circle cx="300" cy="190" r="16" fill="#ffd28a" opacity=".7"/>`;
+ const walk=Math.sin(lt*2.4)*60;
+ s+=`<g transform="translate(${walk} 0)">`+dad(270,560,lt,0.45)+baby(300,840,1.0,lt,{asleep:false,cry:0.6+0.4*Math.abs(Math.sin(lt*3))})+`</g>`;
+ s+=badge(270,110,'6:30 PM',{bg:'#dff6f3',fg:'#0b3a36',stroke:C.teal,size:24,icon:'🕡',p:lt/0.3});
+ s+=badge(130,300,'WHINING',{bg:'#13243b',fg:'#fff',stroke:C.red,size:16,p:(lt-0.7)/0.3});
+ s+=badge(420,300,'IN ARMS',{bg:'#13243b',fg:'#fff',stroke:C.red,size:16,p:(lt-1.2)/0.3});
+ s+=badge(270,380,'TO BED EVEN EARLIER',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:20,p:(lt-2.4)/0.3});
+ return s}
+// S5 night: wake icons ×7
+function s5(lt){let s=bgGrad('g5','#03070f','#0d1a2c')+stars(lt,50);
+ s+=`<circle cx="430" cy="150" r="40" fill="#e9f4ff"/><circle cx="414" cy="140" r="40" fill="#03070f"/>`;
+ s+=`<rect x="120" y="260" width="300" height="380" rx="10" fill="#071020" stroke="#2a4466" stroke-width="10"/><line x1="270" y1="260" x2="270" y2="640" stroke="#2a4466" stroke-width="8"/><line x1="120" y1="450" x2="420" y2="450" stroke="#2a4466" stroke-width="8"/>`;
+ const n=Math.min(7,Math.floor(lt/0.55));
+ for(let i=0;i<n;i++){const x=150+(i%4)*80,y=700+Math.floor(i/4)*90;const p=clamp((lt-i*0.55)/0.25);s+=`<g transform="translate(${x} ${y}) scale(${back(p).toFixed(3)})"><circle r="30" fill="${C.red}"/><circle cx="-9" cy="-4" r="6" fill="#fff"/><circle cx="9" cy="-4" r="6" fill="#fff"/><circle cx="-9" cy="-4" r="3" fill="#1d1612"/><circle cx="9" cy="-4" r="3" fill="#1d1612"/><ellipse cy="12" rx="7" ry="5" fill="#5a1a15"/></g>`}
+ s+=badge(270,190,`WAKE-UPS ×${Math.max(1,n)}`,{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:24,p:(lt-0.2)/0.3});
+ s+=badge(270,110,'NIGHT',{bg:'#13243b',fg:'#cfe9ff',stroke:'#5a7cab',size:18,icon:'☾',p:lt/0.3});
+ return s}
+// S6 sleep per day drops
+function s6(lt){let s=bgGrad('g6','#0b1626','#13243b');
+ s+=bigText(270,150,[['SLEEP PER DAY',C.white]],50,lt/0.35);
+ const bars=[[1,'DAY 1'],[1-ease((lt-0.5)/0.6)*0.1,'DAY 2'],[1-ease((lt-1.5)/0.6)*0.17,'DAY 3']];
+ bars.forEach(([h,l],i)=>{const x=110+i*130,bh=420*h;s+=`<rect x="${x}" y="${760-bh}" width="90" height="${bh}" rx="10" fill="${i?C.red:C.teal}" opacity="${i?0.9:1}"/><text x="${x+45}" y="800" font-size="20" fill="#cfe9ff" text-anchor="middle">${l}</text>`});
+ s+=badge(370,300,'−1H',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:20,p:(lt-0.9)/0.3});
+ s+=badge(450,370,'−1H 30M',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:20,p:(lt-1.9)/0.3});
+ return s}
+// S7 morning: cortisol, noise waves, baby startles
+function s7(lt){let s=bgGrad('g7','#1a2a44','#0b1626');
+ s+=`<circle cx="430" cy="180" r="70" fill="#ffd28a" opacity=".35"/>`;
+ s+=crib(270,700,1.1)+baby(270,680,0.9,lt,{asleep:lt%1.4<0.9});
+ for(let i=0;i<4;i++){const r=(lt*120+i*60)%240;s+=`<circle cx="270" cy="640" r="${r.toFixed(0)}" stroke="${C.yel}" stroke-width="3" fill="none" opacity="${(0.6*(1-r/240)).toFixed(2)}"/>`}
+ const up=ease((lt-0.4)/0.6);
+ s+=`<g opacity="${up}"><path d="M 400 ${420-up*60} l 20 -30 l 20 30 z" fill="${C.red}"/></g>`;
+ s+=badge(270,110,'MORNING',{bg:'#dff6f3',fg:'#0b3a36',stroke:C.teal,size:20,icon:'☀',p:lt/0.3});
+ s+=badge(270,300,'CORTISOL ↑',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:26,p:(lt-0.5)/0.3});
+ s+=badge(270,380,'SLEEPING «ON TOP OF FATIGUE»',{bg:'#13243b',fg:C.yel,stroke:C.yel,size:18,p:(lt-2.0)/0.3});
+ return s}
+// S8 trap: split screen
+function s8(lt){let s=`<rect width="270" height="960" fill="#0e2b2a"/><rect x="270" width="270" height="960" fill="#2b1418"/>`;
+ const p=ease(lt/0.5);s+=`<line x1="270" y1="0" x2="270" y2="${960*p}" stroke="#fff" stroke-width="4"/>`;
+ s+=bigText(135,250,[['OVERTIRED',C.teal]],38,(lt-0.3)/0.35);s+=bigText(405,250,[['UNDERTIRED',C.red]],38,(lt-0.5)/0.35);
+ s+=battery(135,420,0.2,0.55,lt)+battery(405,420,0.2,0.55,lt);
+ const a=ease((lt-1.6)/0.6);
+ s+=`<path d="M 135 500 Q 160 ${500+a*140} 250 ${500+a*170}" stroke="${C.yel}" stroke-width="7" fill="none" opacity="${a}"/><path d="M 405 500 Q 380 ${500+a*140} 290 ${500+a*170}" stroke="${C.yel}" stroke-width="7" fill="none" opacity="${a}"/>`;
+ s+=bigText(270,760,[['EXHAUSTION',C.yel]],66,(lt-2.2)/0.35);
+ s+=badge(270,120,'HERE’S THE TRAP',{bg:'#fff',fg:'#13243b',stroke:C.yel,size:20,icon:'⚠',p:lt/0.3});
+ return s}
+// S9 notebook: sums for 3 days
+function s9(lt){let s=bgGrad('g9','#13243b','#0b1626');
+ const z=1+lt*0.015;s+=`<g transform="translate(270 500) scale(${z.toFixed(3)}) translate(-270 -500)"><rect x="90" y="260" width="360" height="460" rx="14" fill="#eef6fb"/>`;
+ for(let y=330;y<700;y+=50)s+=`<line x1="120" y1="${y}" x2="420" y2="${y}" stroke="#bcd3e6" stroke-width="2"/>`;
+ s+=`<text x="270" y="310" font-size="26" fill="#13243b" text-anchor="middle">TOTAL SLEEP</text>`;
+ [['DAY 1','14h 30m'],['DAY 2','13h 40m'],['DAY 3','13h']].forEach(([d,v],i)=>{const p=clamp((lt-0.6-i*0.7)/0.3);s+=`<g opacity="${p}"><text x="130" y="${415+i*90}" font-size="28" fill="#13243b">${d}</text><text x="410" y="${415+i*90}" font-size="34" font-weight="900" fill="${i?C.red:'#0b6e66'}" text-anchor="end">${v}</text></g>`});
+ const ap=ease((lt-3.0)/0.5);s+=`<path d="M 440 380 L 440 ${380+ap*200}" stroke="${C.red}" stroke-width="8" stroke-linecap="round" opacity="${ap}"/><path d="M 424 ${560} l 16 24 l 16 -24" stroke="${C.red}" stroke-width="8" fill="none" opacity="${clamp((lt-3.4)*3)}"/></g>`;
+ s+=bigText(270,150,[['WHAT TO ',C.white],['CHECK',C.yel],['?',C.white]],52,lt/0.35);
+ s+=badge(270,830,'STOP! NO EVEN EARLIER BEDTIMES',{bg:C.red,fg:'#fff',stroke:'#ffb3aa',size:18,icon:'✋',p:(lt-5.6)/0.3});
+ return s}
+// S10 end card
+function s10(lt){let s=`<rect width="540" height="960" fill="#081221"/>`+stars(lt,30);
+ s+=battery(270,250,ease((lt-0.2)/2.5),0.8,lt);
+ s+=bigText(270,430,[['PART 2',C.white]],66,lt/0.3);
+ s+=`<rect x="${270-150*ease((lt-0.2)/0.3)}" y="450" width="${300*ease((lt-0.2)/0.3)}" height="5" fill="${C.teal}"/>`;
+ s+=bigText(270,515,[['HOW TO RECHARGE',C.teal]],38,(lt-0.3)/0.3);
+ s+=bigText(270,560,[['THE BATTERY TO 100%?',C.teal]],38,(lt-0.4)/0.3);
+ s+=`<text x="270" y="640" font-size="22" fill="#cfe9ff" text-anchor="middle" opacity="${clamp((lt-0.8)*3)}" letter-spacing="1">FOLLOW</text>`;
+ s+=badge(270,710,'MESSAGE ME ON WHATSAPP',{bg:C.yel,fg:'#13243b',stroke:'#fff',size:20,p:(lt-1.6)/0.3});
+ s+=`<text x="270" y="790" font-size="20" fill="#fff" text-anchor="middle" opacity="${clamp((lt-1.0)*3)}">@donchenkode</text>`;
+ return s}
+
+/* ===== REEL CONFIG ===== */
+const SCENES=[[s1,6.0],[s2,3.4],[s3,5.6],[s4,5.2],[s5,4.4],[s6,3.4],[s7,6.0],[s8,5.6],[s9,7.8],[s10,5.6]];
+window.SUBS=false;
+const _st=[];{let a=0;for(const sc of SCENES){_st.push(a);a+=sc[1]}}
+const TOTAL0=SCENES.reduce((a,b)=>a+b[1],0);
+window.SFX=[{t:0,name:'drone',vol:.2,dur:TOTAL0},{t:0.02,name:'boom',vol:.5},{t:0.55,name:'pop',vol:.45},{t:0.4,name:'clock_ticking',vol:.35,dur:1.2},{t:1.6,name:'whoosh_long',vol:.6},{t:1.75,name:'pop',vol:.5},{t:3.2,name:'pop',vol:.4}];
+_st.slice(1).forEach(t=>window.SFX.push({t:t-0.15,name:'whoosh',vol:.55}));
+const _e=[[1,0.05,'pop'],[1,1.2,'ding'],[2,0.3,'clock_fast'],[2,0.6,'pop'],[2,2.6,'pop'],[3,0,'heartbeat'],[3,2.4,'pop'],[4,0,'crickets',.35,4.2],[4,0.6,'alarm',.25],[4,2.2,'alarm',.25],[5,0.9,'pop'],[5,1.9,'pop'],[6,0.5,'heartbeat',.8],[6,0.5,'pop'],[7,1.4,'riser',.45],[7,2.2,'boom',.5],[8,0.6,'tick'],[8,1.3,'tock'],[8,2.0,'tick'],[8,5.6,'switch',.6],[9,1.6,'pop'],[9,0.2,'ding']];
+_e.forEach(([i,dt,n,v,d])=>window.SFX.push(Object.assign({t:_st[i]+dt,name:n,vol:v||.5},d?{dur:d}:{})));
+const TOTAL=TOTAL0;
+const XF=0.18;
+function frame(t){let acc=0,out='';
+ for(let i=0;i<SCENES.length;i++){const [fn,d]=SCENES[i];const st=acc;acc+=d;
+  if(t>=st&&t<acc){out=`<g>${fn(t-st)}</g>`;
+   if(i<SCENES.length-1&&t>acc-XF){const p=(t-(acc-XF))/XF;const sc=1.08-0.08*p;out+=`<g opacity="${p.toFixed(3)}" transform="translate(270 480) scale(${sc.toFixed(3)}) translate(-270 -480)">${SCENES[i+1][0](0)}</g>`}
+   break}}
+ out+=vignette();
+ if(t<TOTAL-5.6)out+=handle();
+ document.getElementById('s').innerHTML=out}
+window.TOTAL=TOTAL;window.frame=frame;frame(0.9);
+window.FPS=30;
+</script></body></html>
