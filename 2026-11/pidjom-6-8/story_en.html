@@ -1,0 +1,267 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-latin-800-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF,U+26A0}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-cyrillic-900-normal.woff2);unicode-range:U+0400-04FF}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-latin-900-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF}
+html,body{margin:0;background:#120a1f;overflow:hidden}
+#s{width:540px;height:960px;display:block}
+text{font-family:RC,sans-serif;font-weight:800}
+</style></head><body>
+<svg id="m" width="10" height="10" style="position:absolute;left:-9999px"></svg><svg id="s" viewBox="0 0 540 960" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const W=540,H=960;
+const C0={bg:'#0b1626',bg2:'#13243b',bld:'#0f1d31',bldEdge:'#2ec4b6',win:'#ffd28a',winOff:'#1a2c45',or:'#2ec4b6',red:'#ff6b5b',yel:'#ffd166',white:'#ffffff',bp:'#0d2744',bpLine:'#2ec4b6',skin:'#e8b48c',skinD:'#c9906a',hair:'#2b2320',hood:'#3a5a7a',teal:'#2ec4b6',navy:'#0b1626'};
+const C={bg:'#1a1030',bg2:'#2a1848',bld:'#22143c',bldEdge:'#f43f75',win:'#f8c838',winOff:'#2e1f4a',or:'#f43f75',red:'#f43f75',yel:'#f8c838',white:'#ffffff',skin:'#e8b48c',skinD:'#c9906a',hair:'#3b2418',sweat:'#5b3a8a',teal:'#9b7bff',navy:'#1a1030',lav:'#e9ddff'};
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>{x=clamp(x);return 1-Math.pow(1-x,3)};
+const back=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+
+/* ---------- shared pieces ---------- */
+function bgGrad(id,top,bot){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs><rect width="540" height="960" fill="url(#${id})"/>`}
+function embers(t,n=26,seed=1){let s='';for(let i=0;i<n;i++){const sp=20+rnd(i+seed)*40;const x=(rnd(i*3+seed)*W+Math.sin(t*1.3+i)*14)%W;const y=H-((rnd(i*7+seed)*H+t*sp)%H);const r=0.8+rnd(i*5+seed)*1.8;const o=0.35+0.5*Math.abs(Math.sin(t*2+i));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#ffb3c8" opacity="${o.toFixed(2)}"/>`}return s}
+function building(x,y,w,h,seed,t,opts={}){let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fill||C.bld}"/>`;
+ if(opts.edge!==false)s+=`<polyline points="${x},${y+h} ${x},${y} ${x+w},${y}" fill="none" stroke="${C.bldEdge}" stroke-width="2" opacity=".85"/>`;
+ const cw=opts.cw||10,ch=opts.ch||13,gx=opts.gx||8,gy=opts.gy||10;let k=0;
+ for(let yy=y+14;yy<y+h-20;yy+=ch+gy){for(let xx=x+10;xx<x+w-cw-4;xx+=cw+gx){k++;const r=rnd(seed*100+k);let on=r>0.62;
+   if(opts.flick&&rnd(seed*31+k)>0.9)on=Math.sin(t*3+k)>0;
+   if(opts.allOff)on=false;
+   s+=`<rect x="${xx}" y="${yy}" width="${cw}" height="${ch}" fill="${on?C.win:C.winOff}" opacity="${on?0.95:0.8}"/>`}}
+ return s}
+function skyline(t,seed,baseY,opts={}){let s='';const items=[[-10,240,90],[70,330,70],[130,180,110],[230,290,80],[300,220,120],[410,310,70],[470,200,90]];
+ items.forEach((b,i)=>{s+=building(b[0],baseY-b[2]-b[1]*0+0-b[1]+b[2],b[2],b[1]+200,seed+i,t,opts)});return s}
+function badge(cx,cy,label,{bg='#dbe9f7',fg='#14365c',size=15,icon='',p=1,stroke='#5b8fc4'}={}){
+ const sc=back(p);const w=label.length*size*0.56+(icon?size*1.4:0)+26;
+ return `<g transform="translate(${cx} ${cy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*3).toFixed(2)}"><rect x="${-w/2}" y="${-size*1.1}" width="${w}" height="${size*2.2}" rx="7" fill="${bg}" stroke="${stroke}" stroke-width="2"/><text x="0" y="${size*0.38}" font-size="${size}" fill="${fg}" text-anchor="middle" letter-spacing=".5">${icon?icon+' ':''}${label}</text></g>`}
+function bigText(x,y,parts,size,p=1,anchor='middle'){const sc=0.6+0.4*back(p);let spans=parts.map(([tx,col])=>`<tspan fill="${col}">${tx}</tspan>`).join('');
+ return `<g transform="translate(${x} ${y}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2.5).toFixed(2)}"><text x="0" y="0" font-size="${size}" font-weight="900" text-anchor="${anchor}" stroke="#000" stroke-width="${size*0.12}" stroke-linejoin="round" paint-order="stroke" letter-spacing="1">${spans}</text></g>`}
+
+/* subtitle: chunk = [[word,color],...]; words pop in sequentially */
+function subtitle(lines,lt,y=640){let s='';const all=lines.flat();let idx=0;
+ lines.forEach((line,li)=>{const size=30;const yy=y+li*36;
+   // measure approx positions
+   const widths=line.map(([w])=>measure(w,size)+size*0.3);const total=widths.reduce((a,b)=>a+b,0);let x=W/2-total/2;
+   line.forEach(([w,col],wi)=>{const p=clamp((lt-idx*0.09)/0.18);idx++;const cx=x+widths[wi]/2;x+=widths[wi];
+     if(p<=0)return;const sc=0.7+0.3*back(p);
+     s+=`<g transform="translate(${cx.toFixed(1)} ${yy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2).toFixed(2)}"><text x="0" y="0" font-size="${size}" text-anchor="middle" fill="${col||'#fff'}" stroke="#000" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${w}</text></g>`})});
+ return s}
+const _mc={};function measure(w,size){const k=w+'|'+size;if(_mc[k])return _mc[k];const svg=document.getElementById('m');svg.innerHTML=`<text font-size="${size}" style="font-family:RC;font-weight:800">${w}</text>`;const v=svg.firstChild.getComputedTextLength();_mc[k]=v;return v}
+const Wd=(str,col)=>str.split(' ').map(w=>[w,col]);
+function subs(chunks,lt,y){ // chunks: [{t0,lines}]
+ if(!window.SUBS)return '';
+ let cur=null;for(const c of chunks)if(lt>=c.t0)cur=c;if(!cur)return '';return subtitle(cur.lines,lt-cur.t0,y)}
+function vignette(){return `<defs><radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient></defs><rect width="540" height="960" fill="url(#vg)"/>`}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">@tanyadonchenko_proson</text>`}
+
+/* ---------- scenes: «Підйом то о 6, то о 8» · palette C violet dusk · hero mom (short hair) + 2-year-old girl · device 24h timeline ---------- */
+const LANG='en';
+const TX={
+ uk:{h1a:'ПІДЙОМ ТО О 6,',h1b:'ТО О 8.',h1c:' ЩО БУДЕ?',hyp:'ГІПОТЕТИЧНИЙ СЦЕНАРІЙ',
+  mon:'ПН',ok:'УСЕ ДОБРЕ',up:'ПІДЙОМ',nap:'ДЕННИЙ СОН',bed:'ВІДБІЙ',t6:'6:00',t12:'12:00',t20:'20:00',t8:'8:00',
+  tue:'ВТ',hard:'ВАЖКА НІЧ',more:'«ПОСПИМО ЩЕ»',
+  napq1:'ДЕННИЙ ',napq2:'СОН?',nope:'НЕ ХОЧЕ',press:'ТИСК СНУ',
+  t21:'21:00',t22:'22:00',hour:'1 ГОД ВКЛАДАННЯ',tears:'СЛЬОЗИ',
+  wed:'СР',when:'КОЛИ ВОНА ЗАСНЕ?',spread:'ДОБА РОЗПОВЗАЄТЬСЯ',
+  morn:'РАНОК',eve:'ВЕЧІР',w1:'ВЕЧІР ',w2:'СКЛАДАЄТЬСЯ',w3:'З РАНКУ',
+  q1:'ЩО ',q2:'ЗРОБИТИ',q3:' ВАМ?',one:'ОДИН БУДИЛЬНИК',oneh:'ОДНА ГОДИНА',nosleep:'ПІСЛЯ НЬОГО НЕ СПИМО',even:'НАВІТЬ ПІСЛЯ ВАЖКОЇ НОЧІ',
+  p2:'ЧАСТИНА 2',p2a:'ЯК ЗСУНУТИ РАНОК,',p2b:'НЕ ЗЛАМАВШИ ДЕНЬ?',sub:'ПІДПИШИСЬ',dm:'НАПИШІТЬ «СОН» У ДІРЕКТ',handle:'@tanyadonchenko_proson'},
+ en:{h1a:'UP AT 6, THEN',h1b:'AT 8.',h1c:' WHAT HAPPENS?',hyp:'HYPOTHETICAL SCENARIO',
+  mon:'MON',ok:'ALL GOOD',up:'WAKE-UP',nap:'NAP',bed:'BEDTIME',t6:'6 am',t12:'12 pm',t20:'8 pm',t8:'8 am',
+  tue:'TUE',hard:'ROUGH NIGHT',more:'"5 MORE MINUTES"',
+  napq1:'NAP',napq2:'TIME?',nope:'NOPE',press:'SLEEP PRESSURE',
+  t21:'9 pm',t22:'10 pm',hour:'1h TO FALL ASLEEP',tears:'TEARS',
+  wed:'WED',when:'WHEN WILL SHE SLEEP?',spread:'THE DAY FALLS APART',
+  morn:'MORNING',eve:'EVENING',w1:'EVENING ',w2:'IS BUILT',w3:'IN THE MORNING',
+  q1:'WHAT ',q2:'TO DO',q3:'?',one:'ONE ALARM',oneh:'ONE TIME',nosleep:'NO SLEEPING AFTER IT',even:'EVEN AFTER A ROUGH NIGHT',
+  p2:'PART 2',p2a:'HOW TO SHIFT THE MORNING',p2b:'WITHOUT BREAKING THE DAY?',sub:'FOLLOW',dm:'DM ME "SLEEP"',handle:'@donchenkode'}
+};
+const L=TX[LANG];
+function stars(lt,n=40){let s='';for(let i=0;i<n;i++){s+=`<circle cx="${(rnd(i)*540).toFixed(0)}" cy="${(rnd(i+50)*420).toFixed(0)}" r="${(rnd(i+9)*1.4+0.4).toFixed(1)}" fill="#efe2ff" opacity="${(0.25+0.5*Math.abs(Math.sin(lt*2+i))).toFixed(2)}"/>`}return s}
+const BG=(id)=>bgGrad(id,'#120a22','#2a1848');
+// mom: short pixie haircut, violet sweater. expr 0 calm .. 1 exhausted
+function mom(cx,cy,lt,expr,smile=0,sc=1){let s='';const bob=Math.sin(lt*3)*2;
+ s+=`<g transform="translate(${cx} ${cy+bob}) scale(${sc})">`;
+ s+=`<path d="M -160 360 q 0 -170 160 -180 q 160 10 160 180 z" fill="${C.sweat}"/>`;
+ s+=`<path d="M -40 182 q 40 30 80 0" stroke="#7b5aaa" stroke-width="10" fill="none"/>`;
+ s+=`<rect x="-24" y="116" width="48" height="66" fill="${C.skinD}"/>`;
+ s+=`<ellipse cx="0" cy="12" rx="92" ry="108" fill="${C.skin}"/>`;
+ s+=`<ellipse cx="-94" cy="20" rx="12" ry="20" fill="${C.skinD}"/><ellipse cx="94" cy="20" rx="12" ry="20" fill="${C.skinD}"/>`;
+ s+=`<circle cx="-94" cy="44" r="6" fill="${C.yel}"/><circle cx="94" cy="44" r="6" fill="${C.yel}"/>`;
+ // pixie hair with side fringe
+ s+=`<path d="M -98 10 q -14 -120 98 -124 q 112 4 100 118 q -6 -40 -30 -62 q -60 30 -150 10 q -10 20 -18 58 z" fill="${C.hair}"/>`;
+ s+=`<path d="M -70 -60 q 70 -20 140 30 q -40 -60 -140 -30 z" fill="#5a3826"/>`;
+ const blink=(lt%2.4>2.28)?0.15:1;const lid=expr*13;
+ s+=`<ellipse cx="-36" cy="8" rx="19" ry="${21*blink}" fill="#fff"/><ellipse cx="36" cy="8" rx="19" ry="${21*blink}" fill="#fff"/>`;
+ if(blink>0.5)s+=`<circle cx="-34" cy="12" r="9" fill="#1d1612"/><circle cx="38" cy="12" r="9" fill="#1d1612"/>`;
+ s+=`<rect x="-58" y="-16" width="42" height="${lid+2}" fill="${C.skin}"/><rect x="16" y="-16" width="42" height="${lid+2}" fill="${C.skin}"/>`;
+ s+=`<path d="M -58 -12 l -10 -6 M 58 -12 l 10 -6" stroke="#1d1612" stroke-width="3"/>`;
+ const br=-expr*6;
+ s+=`<path d="M -58 ${-24+br} q 22 ${-10+expr*14} 42 ${-2+expr*6}" stroke="${C.hair}" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M 58 ${-24+br} q -22 ${-10+expr*14} -42 ${-2+expr*6}" stroke="${C.hair}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+ if(expr>0.3)s+=`<path d="M -52 40 q 16 ${8+expr*8} 32 0" stroke="#9b6aa8" stroke-width="5" fill="none" opacity="${expr}"/><path d="M 20 40 q 16 ${8+expr*8} 32 0" stroke="#9b6aa8" stroke-width="5" fill="none" opacity="${expr}"/>`;
+ s+=`<path d="M 0 30 q -8 20 6 24" stroke="${C.skinD}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+ const m=smile-expr;s+=`<path d="M -24 82 q 24 ${m*20} 48 0" stroke="#a3324a" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+ s+=`<circle cx="-56" cy="56" r="12" fill="#ff8aa8" opacity=".3"/><circle cx="56" cy="56" r="12" fill="#ff8aa8" opacity=".3"/>`;
+ s+=`</g>`;return s}
+// toddler girl ~2y: two puffs, yellow t-shirt. mood: 'play','cry','sleep'
+function kid(cx,cy,sc,lt,mood='play'){const jump=mood==='play'?Math.abs(Math.sin(lt*5))*16:0;let s=`<g transform="translate(${cx} ${cy-jump}) scale(${sc})">`;
+ s+=`<rect x="-36" y="70" width="26" height="70" rx="12" fill="${C.skinD}"/><rect x="10" y="70" width="26" height="70" rx="12" fill="${C.skinD}"/>`;
+ s+=`<path d="M -60 90 q 0 -80 60 -84 q 60 4 60 84 z" fill="${C.yel}"/>`;
+ const arm=mood==='play'?Math.sin(lt*6)*30:mood==='cry'?-50:0;
+ s+=`<g transform="rotate(${-arm} -56 20)"><rect x="-80" y="14" width="24" height="64" rx="12" fill="${C.skin}"/></g><g transform="rotate(${arm} 56 20)"><rect x="56" y="14" width="24" height="64" rx="12" fill="${C.skin}"/></g>`;
+ s+=`<circle cx="0" cy="-50" r="58" fill="${C.skin}"/>`;
+ s+=`<circle cx="-56" cy="-100" r="24" fill="${C.hair}"/><circle cx="56" cy="-100" r="24" fill="${C.hair}"/><path d="M -56 -64 q 56 -60 112 0 q -10 -50 -56 -52 q -46 2 -56 52 z" fill="${C.hair}"/>`;
+ if(mood==='sleep'){s+=`<path d="M -28 -50 q 9 7 18 0 M 10 -50 q 9 7 18 0" stroke="#3a2a20" stroke-width="4" fill="none" stroke-linecap="round"/>`}
+ else{s+=`<circle cx="-20" cy="-50" r="7" fill="#1d1612"/><circle cx="20" cy="-50" r="7" fill="#1d1612"/>`}
+ if(mood==='cry'){s+=`<ellipse cx="0" cy="-18" rx="13" ry="${10+Math.abs(Math.sin(lt*14))*6}" fill="#7a2a35"/><path d="M -24 -40 l -4 ${16+(lt*40)%24}" stroke="#8fd3ff" stroke-width="5" stroke-linecap="round"/><path d="M 24 -40 l 4 ${16+(lt*40+12)%24}" stroke="#8fd3ff" stroke-width="5" stroke-linecap="round"/>`}
+ else if(mood==='play'){s+=`<path d="M -16 -26 q 16 16 32 0" stroke="#a3324a" stroke-width="5" fill="#a3324a"/>`}
+ else s+=`<circle cx="0" cy="-24" r="4" fill="#c97a6a"/>`;
+ s+=`<circle cx="-34" cy="-34" r="9" fill="#ff8aa8" opacity=".45"/><circle cx="34" cy="-34" r="9" fill="#ff8aa8" opacity=".45"/>`;
+ s+=`</g>`;return s}
+function alarm(cx,cy,R,label,lt,{ring=false,col=C.red,off=false}={}){const sh=ring?Math.sin(lt*60)*5:0;let s=`<g transform="translate(${cx+sh} ${cy}) rotate(${ring?Math.sin(lt*50)*5:0})">`;
+ s+=`<line x1="${-R*0.6}" y1="${R*0.8}" x2="${-R*0.85}" y2="${R*1.15}" stroke="${col}" stroke-width="10" stroke-linecap="round"/><line x1="${R*0.6}" y1="${R*0.8}" x2="${R*0.85}" y2="${R*1.15}" stroke="${col}" stroke-width="10" stroke-linecap="round"/>`;
+ s+=`<circle cx="${-R*0.7}" cy="${-R*0.85}" r="${R*0.32}" fill="${col}"/><circle cx="${R*0.7}" cy="${-R*0.85}" r="${R*0.32}" fill="${col}"/><rect x="-6" y="${-R*1.25}" width="12" height="${R*0.3}" fill="${col}"/>`;
+ s+=`<circle r="${R+10}" fill="${col}"/><circle r="${R}" fill="${off?'#3a2a55':'#fff6e0'}"/>`;
+ s+=`<text x="0" y="${R*0.17}" font-size="${R*0.48}" font-weight="900" fill="${off?'#8a7aa8':'#1a1030'}" text-anchor="middle">${label}</text>`;
+ if(ring)for(let i=0;i<3;i++){const a=(lt*3+i/3)%1;s+=`<path d="M ${-R-20-a*40} ${-R*0.4} q ${-14} ${R*0.4} 0 ${R*0.8}" stroke="${C.yel}" stroke-width="5" fill="none" opacity="${(1-a).toFixed(2)}"/><path d="M ${R+20+a*40} ${-R*0.4} q 14 ${R*0.4} 0 ${R*0.8}" stroke="${C.yel}" stroke-width="5" fill="none" opacity="${(1-a).toFixed(2)}"/>`}
+ s+=`</g>`;return s}
+// 24h timeline: marks = [[x,label,time,color]], stretch 0..1 tears it
+function timeline(y,marks,lt,{p=1,stretch=0}={}){let s='';const x0=50,x1=490;const len=(x1-x0)*ease(p);
+ if(stretch<=0){s+=`<rect x="${x0}" y="${y-8}" width="${len}" height="16" rx="8" fill="${C.lav}"/>`}
+ else{const gap=stretch*60;const mid=270;const wob=Math.sin(lt*7)*stretch*10;
+  s+=`<rect x="${x0-gap*0.6}" y="${y-8+wob}" width="${mid-x0-6}" height="16" rx="8" fill="${C.lav}" transform="rotate(${-stretch*6} ${x0} ${y})"/>`;
+  s+=`<rect x="${mid+6+gap*0.6}" y="${y-8-wob}" width="${x1-mid-6}" height="16" rx="8" fill="${C.lav}" transform="rotate(${stretch*6} ${x1} ${y})"/>`;
+  s+=`<path d="M ${mid-8} ${y-16} l 8 10 l -8 8 l 8 10" stroke="${C.red}" stroke-width="5" fill="none" opacity="${stretch}"/>`;}
+ for(let i=0;i<=24;i+=3){const x=x0+(x1-x0)*i/24;if(x-x0<=len&&stretch<=0)s+=`<line x1="${x}" y1="${y+14}" x2="${x}" y2="${y+26}" stroke="${C.lav}" stroke-width="3" opacity=".6"/>`}
+ marks.forEach(([x,lab,tm,col,mp,dx],i)=>{const q=clamp(mp);if(q<=0)return;const xx=x+(dx||0);const yy=y-60*(1-back(q));
+  s+=`<g opacity="${clamp(q*3).toFixed(2)}"><line x1="${xx}" y1="${y}" x2="${xx}" y2="${yy-46}" stroke="${col}" stroke-width="4"/><circle cx="${xx}" cy="${y}" r="14" fill="${col}" stroke="#fff" stroke-width="4"/>`;
+  s+=`<text x="${xx}" y="${yy-82}" font-size="22" fill="${col}" text-anchor="middle" stroke="#000" stroke-width="4" paint-order="stroke">${lab}</text><text x="${xx}" y="${yy-56}" font-size="26" font-weight="900" fill="#fff" text-anchor="middle" stroke="#000" stroke-width="4" paint-order="stroke">${tm}</text></g>`});
+ return s}
+const cBadge=(p)=>({bg:'#f3e9ff',fg:'#2a1848',stroke:'#9b7bff',p});
+const rBadge=(p,size=20)=>({bg:C.red,fg:'#fff',stroke:'#ffc1d3',size,p});
+const yBadge=(p,size=20)=>({bg:'#2a1848',fg:C.yel,stroke:C.yel,size,p});
+
+// S1 hook: two alarm clocks 6 / 8
+function s1(lt){let s=BG('g1')+stars(lt,34);
+
+ const a=back(clamp(lt/0.4)),b=back(clamp((lt-0.6)/0.4));
+ s+=`<g transform="translate(140 560) scale(${a.toFixed(3)})">`+alarm(0,0,90,L.t6,lt,{ring:lt>0.4&&lt<2.6})+`</g>`;
+ s+=`<g transform="translate(400 560) scale(${b.toFixed(3)})">`+alarm(0,0,90,L.t8,lt,{ring:lt>2.6,col:'#9b7bff'})+`</g>`;
+ s+=bigText(270,140,[[L.h1a,C.white]],48,lt/0.35);
+ s+=bigText(270,200,[[L.h1b,C.red],[L.h1c,C.yel]],50,(lt-0.15)/0.35);
+ s+=badge(270,272,L.hyp,Object.assign(cBadge((lt-0.5)/0.3),{icon:'⚠'}));
+ s+=embers(lt,14,5);
+ return s}
+// S2 Monday: tidy timeline
+function s2(lt){let s=BG('g2')+stars(lt,20);
+ s+=badge(270,120,L.mon,Object.assign(cBadge(lt/0.3),{size:26}));
+ const X=h=>50+440*h/24;
+ s+=timeline(560,[[X(6),L.up,L.t6,C.yel,(lt-0.5)/0.3],[X(12),L.nap,L.t12,'#9b7bff',(lt-1.3)/0.3],[X(20),L.bed,L.t20,C.red,(lt-2.1)/0.3]],lt,{p:lt/0.5});
+ s+=kid(270,780,0.75,lt,'play');
+ s+=badge(270,240,L.ok,Object.assign(cBadge((lt-3.4)/0.3),{icon:'✓',size:22,bg:'#c9ffd9',fg:'#0b3a1e',stroke:'#4ade80'}));
+ return s}
+// S3 Tuesday: mom under blanket switches alarm off
+function s3(lt){let s=bgGrad('g3','#0d0719','#1f1236')+stars(lt,26);
+ s+=`<circle cx="440" cy="150" r="40" fill="#f3e9ff"/><circle cx="424" cy="140" r="40" fill="#0d0719"/>`;
+ s+=`<rect x="20" y="560" width="500" height="260" rx="30" fill="#3b2366"/>`;
+ s+=mom(230,500,lt,0.85,0,0.95);
+ s+=`<path d="M 0 640 q 120 -60 270 -40 q 160 20 270 -20 L 540 960 L 0 960 z" fill="#6b4aa8"/><path d="M 0 700 q 140 -40 540 -50" stroke="#8a6bc4" stroke-width="6" fill="none"/>`;
+ const off=lt>1.4;
+ s+=alarm(430,520,56,L.t8,lt,{ring:!off,off});
+ if(lt>1.0){const p=ease((lt-1.0)/0.4);s+=`<rect x="${430-30}" y="${420+(1-p)*60}" width="60" height="40" rx="18" fill="${C.skin}"/>`}
+ s+=badge(270,110,L.tue,Object.assign(cBadge(lt/0.3),{size:26}));
+ s+=badge(150,200,L.hard,Object.assign(yBadge((lt-0.4)/0.3,18),{icon:'☾'}));
+ s+=badge(330,300,L.more,rBadge((lt-1.8)/0.3,20));
+ if(lt>1.4)for(let i=0;i<3;i++){const p=clamp((lt-1.6-i*0.4)/0.9);s+=`<text x="${150+i*24}" y="${460-p*80-i*14}" font-size="${26+i*6}" fill="#efe2ff" opacity="${(1-p).toFixed(2)}">z</text>`}
+ return s}
+// S4 nap refused: kitchen, gauge empty
+function s4(lt){let s=bgGrad('g4','#2a1848','#1a1030');
+ s+=`<rect x="0" y="620" width="540" height="340" fill="#22143c"/><rect x="0" y="600" width="540" height="24" fill="#3b2366"/>`;
+ s+=`<rect x="40" y="300" width="150" height="120" rx="8" fill="#3b2366"/><rect x="60" y="320" width="50" height="80" fill="#22143c"/><rect x="120" y="320" width="50" height="80" fill="#22143c"/>`;
+ s+=`<circle cx="${380+Math.sin(lt*4)*40}" cy="${860-Math.abs(Math.sin(lt*4))*80}" r="26" fill="${C.red}"/><path d="M ${360+Math.sin(lt*4)*40} ${850-Math.abs(Math.sin(lt*4))*80} q 20 20 40 0" stroke="#fff" stroke-width="4" fill="none"/>`;
+ s+=kid(220,760,0.95,lt,'play');
+ const lvl=0.15+0.03*Math.sin(lt*3);const gx=440,gy=360;
+ s+=`<rect x="${gx-36}" y="${gy-150}" width="72" height="300" rx="16" fill="#120a22" stroke="${C.lav}" stroke-width="6"/>`;
+ const h=276*lvl*ease((lt-0.6)/0.6);s+=`<rect x="${gx-24}" y="${gy+138-h}" width="48" height="${h}" rx="8" fill="${C.red}"/>`;
+ s+=`<text x="${gx}" y="${gy+196}" font-size="22" fill="#fff" text-anchor="middle" stroke="#000" stroke-width="4" paint-order="stroke">${Math.round(lvl*100*ease((lt-0.6)/0.6))}%</text>`;
+ s+=badge(gx-40,gy-190,L.press,Object.assign(yBadge((lt-0.8)/0.3,16),{icon:'⏳'}));
+ s+=bigText(200,150,[[L.napq1,C.white],[L.napq2,C.yel]],50,lt/0.35);
+ s+=badge(150,230,L.nope,rBadge((lt-1.2)/0.3,24));
+ return s}
+// S5 evening: clock spins 21 → 22, mom + crying kid
+function s5(lt){let s=bgGrad('g5','#0d0719','#22143c')+stars(lt,30);
+ const ang=(21+ease((lt-0.3)/2.6))/12*2*Math.PI,minA=ang*12;
+ s+=`<g transform="translate(400 230)"><circle r="96" fill="${C.red}"/><circle r="86" fill="#fff6e0"/>`;
+ for(let i=0;i<12;i++){const a=i*Math.PI/6;s+=`<line x1="${(Math.sin(a)*76).toFixed(1)}" y1="${(-Math.cos(a)*76).toFixed(1)}" x2="${(Math.sin(a)*(i%3?66:58)).toFixed(1)}" y2="${(-Math.cos(a)*(i%3?66:58)).toFixed(1)}" stroke="#1a1030" stroke-width="${i%3?3:6}"/>`}
+ s+=`<line x2="${(Math.sin(ang)*44).toFixed(1)}" y2="${(-Math.cos(ang)*44).toFixed(1)}" stroke="#1a1030" stroke-width="9" stroke-linecap="round"/><line x2="${(Math.sin(minA)*68).toFixed(1)}" y2="${(-Math.cos(minA)*68).toFixed(1)}" stroke="${C.red}" stroke-width="5" stroke-linecap="round"/><circle r="8" fill="#1a1030"/></g>`;
+ s+=badge(400,365,lt<1.8?L.t21:L.t22,yBadge((lt-0.2)/0.3,24));
+ s+=mom(200,560,lt,0.95,0,0.85);
+ s+=kid(400,770,0.8,lt,'cry');
+ s+=badge(170,120,L.hour,rBadge((lt-1.0)/0.3,20));
+ s+=badge(170,190,L.tears,Object.assign(cBadge((lt-2.4)/0.3),{icon:'💧'}));
+ return s}
+// S6 Wednesday: timeline tears apart
+function s6(lt){let s=BG('g6')+stars(lt,20);
+ const X=h=>50+440*h/24;const st=ease((lt-0.6)/1.6);
+ s+=timeline(520,[[X(6),L.up,'?',C.yel,1,-st*30+Math.sin(lt*5)*st*14],[X(12),L.nap,'?','#9b7bff',1,st*40+Math.sin(lt*4)*st*18],[X(20),L.bed,'?',C.red,1,st*24+Math.sin(lt*6)*st*12]],lt,{stretch:st});
+ s+=badge(270,110,L.wed,Object.assign(cBadge(lt/0.3),{size:26}));
+ s+=bigText(270,200,[[L.when,C.yel]],34,(lt-0.3)/0.35);
+ s+=badge(270,690,L.spread,rBadge((lt-2.2)/0.3,22));
+ s+=kid(270,860,0.55,lt,'play');
+ return s}
+// S7 morning → evening arrow
+function s7(lt){let s=`<rect width="540" height="960" fill="#1a1030"/>`;
+ const sp=ease(lt/0.6);
+ s+=`<circle cx="120" cy="520" r="${86*sp}" fill="${C.yel}"/>`;for(let i=0;i<8;i++){const a=i*Math.PI/4+lt;s+=`<line x1="${120+Math.cos(a)*104}" y1="${520+Math.sin(a)*104}" x2="${120+Math.cos(a)*126}" y2="${520+Math.sin(a)*126}" stroke="${C.yel}" stroke-width="7" stroke-linecap="round" opacity="${sp}"/>`}
+ const mp=ease((lt-1.4)/0.5);s+=`<circle cx="420" cy="520" r="${80*mp}" fill="#efe2ff"/><circle cx="${400}" cy="508" r="${80*mp}" fill="#1a1030"/>`;
+ const ap=ease((lt-0.7)/0.8);s+=`<path d="M 210 520 L ${210+ap*120} 520" stroke="${C.red}" stroke-width="12" stroke-linecap="round"/>`;
+ if(ap>0.95)s+=`<path d="M 320 500 l 22 20 l -22 20" stroke="${C.red}" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+ s+=bigText(120,700,[[L.morn,C.yel]],34,(lt-0.3)/0.3);s+=bigText(420,700,[[L.eve,'#efe2ff']],34,(lt-1.5)/0.3);
+ s+=bigText(270,170,[[L.w1,C.white],[L.w2,C.red]],46,(lt-1.8)/0.35);
+ s+=bigText(270,232,[[L.w3,C.yel]],50,(lt-2.1)/0.35);
+ return s}
+// S8 one alarm
+function s8(lt){let s=BG('g8')+embers(lt,16,9);
+ const z=1+lt*0.02;s+=`<g transform="translate(270 500) scale(${(z*back(clamp(lt/0.4))).toFixed(3)})">`+alarm(0,0,140,L.t6,lt,{ring:lt>0.5&&lt<3.0})+`</g>`;
+ s+=bigText(270,150,[[L.q1,C.white],[L.q2,C.yel],[L.q3,C.white]],48,lt/0.35);
+ s+=badge(270,240,L.one,Object.assign(cBadge((lt-0.9)/0.3),{size:22}));
+ s+=badge(270,740,L.nosleep,rBadge((lt-2.6)/0.3,22));
+ s+=badge(270,820,L.even,yBadge((lt-4.4)/0.3,18));
+ return s}
+// S9 end card
+function s9(lt){let s=`<rect width="540" height="960" fill="#120a22"/>`+stars(lt,30);
+ const X=h=>50+440*h/24;
+ s+=timeline(250,[[X(6),'','',C.yel,(lt-0.3)/0.3],[X(12),'','','#9b7bff',(lt-0.5)/0.3],[X(20),'','',C.red,(lt-0.7)/0.3]],lt,{p:lt/0.4});
+ s+=bigText(270,430,[[L.p2,C.white]],66,lt/0.3);
+ s+=`<rect x="${270-150*ease((lt-0.2)/0.3)}" y="450" width="${300*ease((lt-0.2)/0.3)}" height="5" fill="${C.red}"/>`;
+ s+=bigText(270,512,[[L.p2a,C.yel]],LANG==='en'?32:36,(lt-0.3)/0.3);
+ s+=bigText(270,556,[[L.p2b,C.yel]],LANG==='en'?32:36,(lt-0.4)/0.3);
+ s+=`<text x="270" y="640" font-size="22" fill="#efe2ff" text-anchor="middle" opacity="${clamp((lt-0.8)*3)}" letter-spacing="1">${L.sub}</text>`;
+ s+=badge(270,710,L.dm,{bg:C.yel,fg:'#1a1030',stroke:'#fff',size:20,p:(lt-1.6)/0.3});
+ s+=`<text x="270" y="790" font-size="20" fill="#fff" text-anchor="middle" opacity="${clamp((lt-1.0)*3)}">${L.handle}</text>`;
+ return s}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">${L.handle}</text>`}
+
+/* ===== REEL CONFIG ===== */
+const SCENES=[[s1,6.4],[s2,5.6],[s3,4.6],[s4,4.8],[s5,5.0],[s6,4.8],[s7,4.8],[s8,6.8],[s9,5.6]];
+window.SUBS=false;
+const _st=[];{let a=0;for(const sc of SCENES){_st.push(a);a+=sc[1]}}
+const TOTAL0=SCENES.reduce((a,b)=>a+b[1],0);
+window.SFX=[{t:0,name:'drone',vol:.2,dur:TOTAL0},{t:0.02,name:'boom',vol:.5},{t:0.4,name:'alarm',vol:.3},{t:2.6,name:'alarm',vol:.3},{t:0.55,name:'pop',vol:.45}];
+_st.slice(1).forEach(t=>window.SFX.push({t:t-0.15,name:'whoosh',vol:.55}));
+const _e=[[1,0.5,'pop'],[1,1.3,'pop'],[1,2.1,'pop'],[1,3.4,'ding'],[2,0,'crickets',.3,4.4],[2,0.2,'alarm',.25],[2,1.4,'click',.6],[2,1.8,'pop'],[3,0.8,'pop'],[3,1.2,'boom',.4],[4,0.3,'clock_fast',.45],[4,1.0,'pop'],[4,1.2,'heartbeat',.6],[5,0.6,'riser',.4],[5,2.2,'boom',.5],[6,0.7,'whoosh_long',.5],[6,2.0,'ding'],[7,0.5,'alarm',.35],[7,0.9,'pop'],[7,2.6,'pop'],[7,4.4,'pop'],[8,1.6,'pop'],[8,0.2,'ding']];
+_e.forEach(([i,dt,n,v,d])=>window.SFX.push(Object.assign({t:_st[i]+dt,name:n,vol:v||.5},d?{dur:d}:{})));
+const TOTAL=TOTAL0;
+const XF=0.18;
+function frame(t){let acc=0,out='';
+ for(let i=0;i<SCENES.length;i++){const [fn,d]=SCENES[i];const st=acc;acc+=d;
+  if(t>=st&&t<acc){out=`<g>${fn(t-st)}</g>`;
+   if(i<SCENES.length-1&&t>acc-XF){const p=(t-(acc-XF))/XF;const sc=1.08-0.08*p;out+=`<g opacity="${p.toFixed(3)}" transform="translate(270 480) scale(${sc.toFixed(3)}) translate(-270 -480)">${SCENES[i+1][0](0)}</g>`}
+   break}}
+ out+=vignette();
+ if(t<TOTAL-5.6)out+=handle();
+ document.getElementById('s').innerHTML=out}
+window.TOTAL=TOTAL;window.frame=frame;frame(0.9);
+window.FPS=30;
+</script></body></html>
