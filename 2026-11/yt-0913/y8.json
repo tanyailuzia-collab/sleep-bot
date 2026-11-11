@@ -1,0 +1,124 @@
+{
+"format": "16:9",
+"tag": "SLEEP WITH TETIANA",
+"handle": "@donchenkode",
+"wps": 2.6,
+"scenes": [
+{
+"type": "hook",
+"badge": "Oversleeping",
+"big": "+1h = −1h",
+"title": "An extra hour of sleep today, an hour short tomorrow",
+"voice": "Your child finally napped for two hours straight. You breathed out. And the next day: an hour to fall asleep, short naps, and a night-time party. It's not a coincidence, and it's not a regression. Today I'll explain why a good day can break the night, and share a simple rule I give moms in consultations, so long naps stop being scary."
+},
+{
+"type": "statement",
+"title": "A record day, then a hard night",
+"icon": "moon",
+"sub": "The body counts sleep by the day, not by the nap",
+"voice": "Hi, I'm Tetiana, a baby sleep consultant. I've worked with more than five thousand families over eight years. Moms often tell me the same story. It was a wonderful day, the baby slept long and sweetly. And the next twenty-four hours were among the hardest of the week. Then comes the fear of long naps: maybe I shouldn't let her sleep that long? Maybe I ruined something? No. The body simply counts sleep not nap by nap, but by the whole day."
+},
+{
+"type": "chapter",
+"badge": "Part 1",
+"title": "What it looks like in numbers",
+"icon": "bars",
+"voice": "Here's a real diary of a boy who is three and a half months old."
+},
+{
+"type": "point",
+"n": 1,
+"title": "16h 9m, then 14h 24m",
+"body": "Nothing bad happened in between",
+"icon": "bars",
+"voice": "On one day, his total sleep was sixteen hours nine minutes. That's almost forty minutes more than his need. And the next day: fourteen hours twenty-four minutes. A dip. Nothing bad happened between those two days. I call this: overslept, then reset."
+},
+{
+"type": "chapter",
+"badge": "Part 2",
+"title": "Why it happens",
+"icon": "wave",
+"voice": "Why does this happen? Again, it comes down to sleep pressure."
+},
+{
+"type": "statement",
+"title": "More sleep today means less pressure tomorrow",
+"icon": "spark",
+"voice": "To fall asleep, a child needs sleep pressure: the tiredness that builds while she's awake. When she takes more sleep today, there's less pressure the next day. She can't fall asleep as easily as usual. Settling drags on, naps get shorter, and in the evening mom can't understand what went wrong. It isn't mom's mistake, and it isn't the child's personality. It's simply physiology: the body keeps its balance across the day."
+},
+{
+"type": "chapter",
+"badge": "Part 3",
+"title": "What I do with oversleeping",
+"icon": "clock",
+"voice": "So I don't celebrate oversleeping. I account for it."
+},
+{
+"type": "point",
+"n": 1,
+"title": "Add the extra to tomorrow's awake time",
+"body": "Slept 30 minutes more? Bedtime 30 minutes later",
+"icon": "clock",
+"voice": "If total sleep went over the need, the difference is added to the awake time the next day. For example, the baby slept half an hour longer, so tomorrow bedtime is half an hour later."
+},
+{
+"type": "point",
+"n": 2,
+"title": "The morning stays where it is",
+"body": "We don't move the morning anchor",
+"icon": "ring",
+"voice": "And the morning stays where it is. We don't move the morning anchor."
+},
+{
+"type": "point",
+"n": 3,
+"title": "Don't stretch the next nap",
+"body": "Lost hours are made up at night",
+"icon": "crib",
+"voice": "One more rule: if a nap didn't work out, don't stretch the next one beyond the need. The child will make up the missing hours at night, and a third nap dragged out to compensate breaks the structure of the day. There is one exception: illness with a fever. Then the schedule is on pause, and the child sleeps as much as she needs."
+},
+{
+"type": "statement",
+"big": true,
+"title": "A long day and a hard day side by side is not a setback",
+"icon": "heart",
+"voice": "One long day and one hard day side by side is not a setback. It's a body counting its own day. When you see it in numbers, the fear that you've broken everything disappears."
+},
+{
+"type": "chapter",
+"badge": "Part 4",
+"title": "When not to make up sleep",
+"icon": "nope",
+"voice": "There are also times when lost sleep doesn't need to be made up at all."
+},
+{
+"type": "point",
+"n": 1,
+"title": "A leaky nappy, a tummy ache",
+"body": "Just go back to your morning anchor",
+"icon": "moon",
+"voice": "For example, a night when the nappy leaked, or two restless hours because of a tummy ache. The body doesn't make up that kind of lost sleep by the rules, and trying to sleep it off the next day means throwing off another whole day. Just go back to your morning anchor and a normal day."
+},
+{
+"type": "point",
+"n": 2,
+"title": "Illness with a fever",
+"body": "We don't analyse, we support",
+"icon": "heart",
+"voice": "And the other way round: when a child is ill with a fever, she might sleep four or five hours at a stretch, almost around the clock. On those days we don't analyse the schedule or count anything. We just support the child. Moms often worry that after an illness they'll have to start all over again. No. Once your child is well, you go back to the same numbers, and within a few days the day evens out again."
+},
+{
+"type": "point",
+"title": "Your step",
+"body": "Compare total sleep for the last two days",
+"icon": "diary",
+"voice": "The most important thing I want you to take from this video: one hard day doesn't cancel out your work. A child's sleep moves in waves, not in a straight line, and if you rewrite the plan after every bad evening, your child doesn't have time to get used to anything. Hold the morning, count the whole day, and the waves will gradually get smaller. Your step: compare total sleep for the last two days. If a record day is followed by a hard one, next time add the difference to the next day's awake time and move bedtime, without touching the morning."
+},
+{
+"type": "cta",
+"title": "Want to count it on your diary?",
+"button": "Message me on WhatsApp",
+"voice": "Message me on WhatsApp or in Instagram Direct if you'd like to work this out on your own diary. The link is in the description. Thanks for watching."
+}
+]
+}

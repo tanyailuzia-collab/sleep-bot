@@ -1,0 +1,109 @@
+{
+"format": "16:9",
+"tag": "SLEEP WITH TETIANA",
+"handle": "@donchenkode",
+"wps": 2.6,
+"scenes": [
+{
+"type": "hook",
+"badge": "Early waking",
+"big": "5 am",
+"title": "Five things I check before moving bedtime",
+"voice": "Your baby wakes up at five in the morning, and everyone gives you the same advice: put them to bed later. I'm a sleep consultant, and I'll tell you that this exact advice most often makes mornings even earlier. Here are the five things I check first. Bedtime is the last one on the list."
+},
+{
+"type": "statement",
+"title": "\"Just put her to bed later.\"",
+"icon": "moon",
+"sub": "The most common advice, and the most common trap",
+"voice": "Hi, I'm Tetiana, a baby sleep consultant. I've worked with more than five thousand families over eight years. Picture this. It's five past five, and there's already singing in the crib. You lie there with your eyes open, counting the hours until evening. The most logical thought is: if I put her down later, she'll sleep longer in the morning. In practice, a later bedtime with no changes during the day leads to overtiredness. And an overtired child doesn't wake up later. She wakes up earlier. That's why I never start with the evening."
+},
+{
+"type": "chapter",
+"badge": "Check 1",
+"title": "The morning anchor",
+"icon": "clock",
+"voice": "The first thing I ask is: what happens at five o'clock?"
+},
+{
+"type": "point",
+"n": 1,
+"title": "One wake-up time",
+"body": "After it, no more sleep, even after a rough night",
+"icon": "clock",
+"voice": "If the baby is taken into your bed, fed, and dozes back off until seven, the body learns that the day starts at five. Without meaning to, we reward the early waking. So I set a morning anchor: one time after which we don't sleep, even after a rough night. Before it, everything stays quiet and dark, with no play and no lights. The signal that the day has started isn't the clock. It's what you do: open the curtains, get dressed, switch on the kettle."
+},
+{
+"type": "chapter",
+"badge": "Checks 2 and 3",
+"title": "Total sleep and the last awake time",
+"icon": "bars",
+"voice": "Second and third: total sleep for the day, and the awake time before the night."
+},
+{
+"type": "point",
+"n": 2,
+"title": "Total sleep in 24 hours",
+"body": "Sometimes 5 am simply means she's had enough",
+"icon": "bars",
+"voice": "Second: total sleep in twenty-four hours. Sometimes a child wakes at five simply because she's already had enough sleep. If she sleeps more during the day than she needs, the morning gets cut short on its own. Then we take sleep away from the day, not from the night."
+},
+{
+"type": "point",
+"n": 3,
+"title": "Awake time before the night",
+"body": "Too long or too short, both lead to 5 am",
+"icon": "wave",
+"voice": "Third: the awake time before the night. If it's too long, the child goes to bed overtired, and towards morning, when stress hormones naturally rise, sleep becomes fragile. If it's too short, she goes to bed under-tired and finishes the sleep she needs earlier. Both roads lead to five in the morning."
+},
+{
+"type": "chapter",
+"badge": "Check 4",
+"title": "The first nap",
+"icon": "crib",
+"voice": "Fourth: the first nap of the day."
+},
+{
+"type": "point",
+"n": 4,
+"title": "Not a continuation of the night",
+"body": "Move it 10 to 15 minutes, once every three days",
+"icon": "crib",
+"voice": "If the baby falls asleep for it almost right after waking up, it isn't really a nap. It's a continuation of the night. The body treats the morning as a break, and the night gradually slides earlier. What we do: move the first nap ten to fifteen minutes later, once every three days. Not an hour at a time, because the body needs time to adjust."
+},
+{
+"type": "point",
+"n": 5,
+"title": "And only then, bedtime",
+"body": "Usually a result of the first four",
+"icon": "moon",
+"voice": "And only fifth: bedtime. It's the first thing people move, even though it's usually just a result of the first four. When the morning, total sleep, awake time and the first nap are in place, the evening usually settles by itself. It's not that you're doing something wrong. Early waking simply has several causes, and it's worth checking them one by one."
+},
+{
+"type": "statement",
+"title": "What happens when you start from the end of the list",
+"icon": "roly",
+"voice": "Let me show you what this looks like from the inside. A mom moves bedtime from seven pm to eight pm. For the first two days the baby falls asleep faster, because she's tired, and it seems to be working. On the third day she wakes at half past four, because she went to bed overtired. Mom decides it needs to be even later, and a week later evenings drag on until nine pm, mornings are even earlier, and mom herself is sleeping five hours a night."
+},
+{
+"type": "statement",
+"big": true,
+"title": "She did exactly what she was told. She just started at the wrong end.",
+"icon": "heart",
+"voice": "The most painful part of this story is that mom was doing exactly what she'd been advised. She wasn't wrong. She just started at the wrong end. When we start with the morning and total sleep, changes happen more slowly, but they last. And one more important thing: if your child is ill, has a fever, or is teething, all these checks are on pause. Then we simply support the child, and come back to the schedule once she's well."
+},
+{
+"type": "point",
+"title": "Your step this week",
+"body": "For three days, write down: wake-up, total sleep, first nap",
+"icon": "diary",
+"voice": "One more thing before you go. If you're reading this at five in the morning with a baby in your arms, you haven't done anything wrong. Early waking is exhausting, and feeling irritated doesn't make you a worse mom. It means you haven't slept in a long time. So let's start with a small step that doesn't break anything. For three days, write down just three things: wake-up time, total sleep, and the time of the first nap. Don't change anything, just write it down. By day three you'll see which of the five points is yours."
+},
+{
+"type": "cta",
+"title": "Want me to look at your numbers?",
+"button": "Message me on WhatsApp",
+"voice": "If you'd like me to look at your numbers with you, message me on WhatsApp or in Instagram Direct. The link is in the description. Thanks for watching, and I hope tomorrow's morning comes a little later."
+}
+]
+}

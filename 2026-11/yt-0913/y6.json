@@ -1,0 +1,131 @@
+{
+"format": "16:9",
+"tag": "SLEEP WITH TETIANA",
+"handle": "@donchenkode",
+"wps": 2.6,
+"scenes": [
+{
+"type": "hook",
+"badge": "Under-tired baby",
+"big": "1h 30m",
+"title": "less sleep a day, from being too careful",
+"voice": "Better under-tired than overtired. This advice sounds like care. But this week I saw what it looks like in numbers: up to an hour and a half of lost sleep every single day, in a four-month-old baby. Let's look at how caution turns into exhaustion."
+},
+{
+"type": "statement",
+"title": "7 to 10 wake-ups a night",
+"icon": "moon",
+"sub": "A four-month-old girl, and a mom sure she had broken something",
+"voice": "Hi, I'm Tetiana, a baby sleep consultant. I've worked with more than five thousand families over eight years. The mom of a four-month-old girl came to me with seven to ten wake-ups a night. Every hour, sometimes every hour and a half. In the evening, endless fussing, and sleep only in her arms. The hardest part was that three weeks earlier things had almost settled. And she was sure she had broken something herself. A regression, teeth, a mistake. Her plan was logical: put her daughter down even earlier, so she'd never get overtired."
+},
+{
+"type": "chapter",
+"badge": "Part 1",
+"title": "What the sleep diary showed",
+"icon": "diary",
+"voice": "So we opened her sleep diary and counted."
+},
+{
+"type": "point",
+"n": 1,
+"title": "13h 6m to 13h 50m a day",
+"body": "Her own need: about 14h 30m",
+"icon": "bars",
+"voice": "I added up her total sleep for each day. From thirteen hours six minutes to thirteen hours fifty minutes. But her own need, judging by the diary, was about fourteen and a half hours. So every day this baby was missing forty minutes to an hour and a half of sleep. She was living on the sleep of a seven or eight month old. If mom had put her down even earlier, there wouldn't have been more sleep. There would have been even less."
+},
+{
+"type": "chapter",
+"badge": "Part 2",
+"title": "Why under-tired is tiring too",
+"icon": "wave",
+"voice": "How can going to bed earlier mean less sleep? It comes down to sleep pressure."
+},
+{
+"type": "statement",
+"title": "Sleep pressure: the tiredness that builds while awake",
+"icon": "spark",
+"voice": "To fall into deep sleep, a child needs sleep pressure: tiredness that builds up while she's awake. If you put her down before that pressure has built, she falls asleep lightly and wakes at the very first transition between sleep cycles. Naps get shorter. The sleep debt grows, like a ball of yarn that keeps winding itself."
+},
+{
+"type": "point",
+"n": 2,
+"title": "Sleeping on top of tiredness",
+"body": "Waking at a rustle, a creak, the moment you step away",
+"icon": "roly",
+"voice": "And then the body switches on stress hormones. A tired child sleeps on top of her tiredness. She wakes at a rustle, the moment you step away, the creak of the floor. Under-tired and overtired come in from different sides, but they lead to the same exhaustion."
+},
+{
+"type": "statement",
+"big": true,
+"title": "A battery at 50% drains fast",
+"icon": "ring",
+"voice": "I explain it to moms with a battery. A phone at fifty percent drains quickly and switches into power-saving mode. A child with a half-charged battery is just the same: fussing, tears, and switching off in your arms."
+},
+{
+"type": "chapter",
+"badge": "Part 3",
+"title": "What we changed",
+"icon": "heart",
+"voice": "So what did we do? We gave this baby her own sleep need back."
+},
+{
+"type": "point",
+"n": 1,
+"title": "Morning anchor at 8 am",
+"body": "Total sleep and awake time as two steady lines",
+"icon": "clock",
+"voice": "A morning anchor at eight am: after it, no more sleep. Total sleep and total awake time for the day as two steady lines."
+},
+{
+"type": "point",
+"n": 2,
+"title": "Three naps with clear limits",
+"body": "1h 30m, 1h 30m, then 1h",
+"icon": "crib",
+"voice": "Three naps with clear limits: the first two no longer than an hour and a half, the third no longer than an hour. And if she switches off in your arms in the evening, a short micro-nap of ten to fifteen minutes, then a bit more awake time, and down for the night. No crying it out."
+},
+{
+"type": "chapter",
+"badge": "Part 4",
+"title": "Under-tired or overtired?",
+"icon": "nope",
+"voice": "How do you know if your child is under-tired? Look at three things."
+},
+{
+"type": "point",
+"n": 1,
+"title": "Falling asleep",
+"body": "Under-tired: 30 to 40 minutes of wriggling",
+"icon": "clock",
+"voice": "First: falling asleep. An under-tired child tosses and turns and plays, and settling takes thirty to forty minutes. An overtired one, on the other hand, switches off almost instantly, or falls asleep through a meltdown."
+},
+{
+"type": "point",
+"n": 2,
+"title": "The first half of the night",
+"body": "Under-tired: cheerful night-time parties",
+"icon": "moon",
+"voice": "Second: the first half of the night. After being under-tired, night-time parties are more common, when the child wakes up cheerful and stays awake for a long time. Third: naps. If they're consistently short and the child is lively afterwards, that's a clue too. One sign on its own says nothing. Look at all three together."
+},
+{
+"type": "statement",
+"title": "Her need is her own",
+"sub": "I always count from the diary, not from age",
+"icon": "diary",
+"voice": "And remember: your child's sleep need is her own. The four-month-old in this story needed fourteen and a half hours, while another baby of the same age might need less. That's why I always count from the diary, not from age."
+},
+{
+"type": "point",
+"title": "Check this today",
+"body": "Total sleep for the last 3 days vs a month ago",
+"icon": "bars",
+"voice": "If you recognized yourself in this story, don't blame yourself. You were putting her down earlier because you cared, and that logic is in every other piece of advice. Now you simply know it has a flip side, and you can check it on your own numbers. Here's what to check today: add up your child's total sleep for the last three days and compare it with a month ago. If there's less sleep, and you keep putting her down earlier just in case, stop and look at how long she is actually awake. It's not that you care too little. Caution simply has a price too."
+},
+{
+"type": "cta",
+"title": "Let's work out your child's sleep need",
+"button": "Message me on WhatsApp",
+"voice": "Message me on WhatsApp or in Instagram Direct, and we'll work out your child's sleep need together. The link is in the description. Thanks for watching."
+}
+]
+}

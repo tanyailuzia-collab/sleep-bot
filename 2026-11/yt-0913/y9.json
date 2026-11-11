@@ -1,0 +1,140 @@
+{
+"format": "16:9",
+"tag": "SLEEP WITH TETIANA",
+"handle": "@donchenkode",
+"wps": 2.6,
+"scenes": [
+{
+"type": "hook",
+"badge": "Nap refusal",
+"big": "7",
+"title": "things to check before you drop a nap",
+"voice": "He just doesn't like napping. I hear this every week. And every time, mom is ready to drop the nap just to end the daily battle. But that is often followed by a meltdown at five pm and a wake-up at five am. Here are seven things I check before I agree. Check them with me, and maybe the nap will come back in your home."
+},
+{
+"type": "statement",
+"title": "Why dropping a nap feels like rescue",
+"icon": "nope",
+"sub": "Usually the child isn't against sleep, but against the conditions",
+"voice": "Hi, I'm Tetiana, a baby sleep consultant. I've worked with more than five thousand families over eight years. When every nap turns into an hour of rocking and tears, the logic is simple: if the nap isn't working, maybe it isn't needed? Moms say it with tiredness, and even with relief. But most often, the child isn't against sleep. He's against the conditions in which that sleep is offered."
+},
+{
+"type": "chapter",
+"badge": "Levers 1–3",
+"title": "Morning, awake time, total sleep",
+"icon": "clock",
+"voice": "Let's start with the first three levers."
+},
+{
+"type": "point",
+"n": 1,
+"title": "The morning anchor",
+"body": "If wake-up drifts, the nap lands on tiredness one day and energy the next",
+"icon": "clock",
+"voice": "First: the morning anchor. If the wake-up time drifts, the nap lands on tiredness one day and on energy the next. Today he falls asleep, tomorrow he doesn't like napping."
+},
+{
+"type": "point",
+"n": 2,
+"title": "Awake time before the nap",
+"body": "Too short or too long both look like 'won't sleep'",
+"icon": "wave",
+"voice": "Second: awake time before the nap. If it's too short, the child isn't ready yet. If it's too long, he's already running on adrenaline. Both look like he just doesn't want to sleep."
+},
+{
+"type": "point",
+"n": 3,
+"title": "Total sleep for the day",
+"body": "If the night takes too much, there's no room left for a nap",
+"icon": "bars",
+"voice": "Third: total sleep for the day. If the night takes too much, there's simply no room left for sleep during the day. Then the question isn't about the nap at all, but about how the day is divided."
+},
+{
+"type": "chapter",
+"badge": "Levers 4–5",
+"title": "Number of naps and how he falls asleep",
+"icon": "crib",
+"voice": "Fourth and fifth: the number of naps, and how he falls asleep."
+},
+{
+"type": "point",
+"n": 4,
+"title": "The number of naps",
+"body": "Maybe he has outgrown just one of them",
+"icon": "bars",
+"voice": "Fourth: the number of naps. Maybe your child isn't against sleeping, but against one extra nap he has already outgrown. Then the other naps get shorter, and it looks as if he doesn't like sleeping at all."
+},
+{
+"type": "point",
+"n": 5,
+"title": "How he falls asleep",
+"body": "Stroller by day, crib at night: two different stories",
+"icon": "crib",
+"voice": "Fifth: how he falls asleep. If during the day he's put in the stroller, and in the evening in the crib, the brain doesn't recognise the signal. For the brain, these are two different stories."
+},
+{
+"type": "chapter",
+"badge": "Levers 6–7",
+"title": "Routine and environment",
+"icon": "moon",
+"voice": "Sixth and seventh: the routine and the environment."
+},
+{
+"type": "point",
+"n": 6,
+"title": "A short routine",
+"body": "Curtains, a quiet song, a sleep toy. The same every time",
+"icon": "heart",
+"voice": "Sixth: the routine. Two or three identical steps before every sleep tell the brain we're about to sleep, more strongly than any darkness. Close the curtains, a quiet song, a sleep toy. The same every time."
+},
+{
+"type": "point",
+"n": 7,
+"title": "The environment",
+"body": "Important, but it doesn't work without the first six",
+"icon": "spark",
+"voice": "Seventh: the environment. Light, noise, temperature, the place. I check it last, even though moms often start right there: they buy blackout curtains, white noise, a new crib. It matters, but without the first six it doesn't work."
+},
+{
+"type": "statement",
+"title": "Only then do we talk about dropping a nap",
+"sub": "Gradually, in steps of 10 to 15 minutes",
+"icon": "clock",
+"voice": "Only when all seven have been checked do we talk about dropping a nap. And then we do it gradually, in steps of ten to fifteen minutes, not in a single day. It isn't that your child is a bad sleeper. Most often, one of these levers is simply in the wrong place."
+},
+{
+"type": "chapter",
+"badge": "In practice",
+"title": "What the check looks like",
+"icon": "diary",
+"voice": "In practice, this takes a few days."
+},
+{
+"type": "point",
+"title": "Three days of notes, no changes",
+"body": "Wake-up, every nap with start and end, how and where he fell asleep",
+"icon": "diary",
+"voice": "For the first three days you change nothing, you just write things down: wake-up, every nap with its start and end, how your child fell asleep and where. Then we look at the notes together, and almost always we see one or two points that explain the dislike of napping. Often it's the first lever: wake-up drifts by an hour, and the child simply doesn't get tired enough before the nap. Or the fourth: a nap he has already outgrown."
+},
+{
+"type": "statement",
+"big": true,
+"title": "Drop a nap when your child is ready, not when you're out of strength",
+"icon": "heart",
+"voice": "Moms sometimes worry that dropping a nap means giving up. No. If all seven levers have been checked and the child is truly ready, moving to fewer naps is a normal stage. But we do it when the child is ready, not when mom has run out of strength."
+},
+{
+"type": "point",
+"title": "Your step for tomorrow",
+"body": "Check levers 1 and 2 for three days",
+"icon": "clock",
+"voice": "Remember: the nap isn't a battlefield, and your child isn't fighting you. He's simply reacting to conditions that don't suit him yet. When the conditions fall into place, sleep often comes back by itself, without any scary methods. And you finally get those two hours in the day that you miss so much. Your step for tomorrow: check at least the first two levers. What time was wake-up, and how long was your child awake before the nap he doesn't like? Write it down for three days. Very often, the answer is already there."
+},
+{
+"type": "cta",
+"title": "Want to go through all seven together?",
+"button": "Message me on WhatsApp",
+"voice": "If you'd like to go through all seven together, message me on WhatsApp or in Instagram Direct. The link is in the description. Thanks for watching."
+}
+]
+}

@@ -1,0 +1,125 @@
+{
+"format": "16:9",
+"tag": "SLEEP WITH TETIANA",
+"handle": "@donchenkode",
+"wps": 2.6,
+"scenes": [
+{
+"type": "hook",
+"badge": "Sleep needs",
+"big": "9.7 – 15.9",
+"title": "hours of sleep a day, and all of it is normal",
+"voice": "How much should your baby sleep? Charts give you one number. But a review of thirty-four studies shows that healthy infants sleep anywhere from nine point seven to fifteen point nine hours a day. That's a six-hour difference. Today I'll show you how to find your own child's number."
+},
+{
+"type": "statement",
+"title": "Every mom has that chart on her phone",
+"icon": "nope",
+"sub": "And almost every one finds a reason to worry in it",
+"voice": "Hi, I'm Tetiana, a baby sleep consultant. I've worked with more than five thousand families over eight years. Almost every mom I work with has, at some point, kept a chart on her phone of how much a baby should sleep at this age. And almost every one found a reason to worry in it. One child sleeps less than the chart says, and mom searches every night for where she went wrong. Another sleeps more, and mom wakes her on a timer because that's enough. Both feel guilty because of a number that has nothing to do with their children."
+},
+{
+"type": "chapter",
+"badge": "Part 1",
+"title": "What the science says",
+"icon": "spark",
+"voice": "So let's look at what the research actually says."
+},
+{
+"type": "point",
+"n": 1,
+"title": "34 studies, one review",
+"body": "Galland et al., 2012, Sleep Medicine Reviews",
+"icon": "diary",
+"voice": "In 2012, Barbara Galland and her colleagues pulled together data from thirty-four studies on normal sleep in children, and published a review in the journal Sleep Medicine Reviews. The average total sleep for infants came out at twelve point eight hours a day."
+},
+{
+"type": "statement",
+"big": true,
+"title": "Normal range: 9.7 to 15.9 hours",
+"icon": "bars",
+"voice": "But the normal range stretched from nine point seven to fifteen point nine hours. So two perfectly healthy children can differ by six hours of sleep. The average isn't a mistake. It just describes a group, not your child."
+},
+{
+"type": "chapter",
+"badge": "Part 2",
+"title": "Three babies, three needs",
+"icon": "crib",
+"voice": "Here's what that looks like in real life."
+},
+{
+"type": "point",
+"n": 1,
+"title": "15h, 14h 30m, 14h",
+"body": "Three babies aged 3.5 to 5.5 months, this week",
+"icon": "bars",
+"voice": "This week I worked with three babies, aged three and a half to five and a half months. Their needs, worked out from their diaries: fifteen hours, fourteen and a half, and fourteen. If I had used one chart, every one of these children would have got the wrong evening. One would go to bed under-tired, another overtired. And mom would think the problem was in how she puts her baby down."
+},
+{
+"type": "chapter",
+"badge": "Part 3",
+"title": "How to work out your child's need",
+"icon": "diary",
+"voice": "Here's how I do it, in five steps."
+},
+{
+"type": "point",
+"n": 1,
+"title": "Write down 3 to 4 days",
+"body": "Wake-up, every nap, bedtime",
+"icon": "diary",
+"voice": "First: for three or four days, write everything down. Wake-up, every nap, bedtime. Second: add up the total sleep for each day. Third: take the average."
+},
+{
+"type": "point",
+"n": 4,
+"title": "Count different nap days separately",
+"body": "The need on three naps and on two is different",
+"icon": "clock",
+"voice": "Fourth: count days with a different number of naps separately, because the need on three naps and on two naps is different."
+},
+{
+"type": "point",
+"n": 5,
+"title": "Then look at behaviour",
+"body": "Numbers without behaviour say nothing",
+"icon": "heart",
+"voice": "And fifth: look at behaviour. How your child falls asleep, how she wakes up, how she copes in the evening. Numbers without behaviour say nothing, and behaviour without numbers is misleading. Once you've found the need, you stop fighting the chart and start working with your child. The evening becomes predictable, and that daily feeling of I'm doing something wrong goes away."
+},
+{
+"type": "chapter",
+"badge": "Part 4",
+"title": "Why the need keeps changing",
+"icon": "wave",
+"voice": "There's one more reason not to hold on to a chart: your child's need doesn't stand still."
+},
+{
+"type": "point",
+"n": 1,
+"title": "Every 1 to 2 weeks until 8–9 months",
+"body": "One boy's awake times grew by 45 minutes in a week",
+"icon": "roly",
+"voice": "Until eight or nine months, it can change every week or two. This week I saw a boy whose awake times grew by forty-five minutes in a single week. His mom thought his naps had fallen apart, but he had simply outgrown his old schedule."
+},
+{
+"type": "statement",
+"title": "Review the diary every week until 9 months",
+"sub": "Last four days: has total sleep changed?",
+"icon": "diary",
+"voice": "That's why, until nine months, I recommend reviewing the diary every week. Take the last four days and see whether total sleep has changed. If it has, recalculate the need. It doesn't mean you're doing something wrong. It means your child is growing, and the schedule grows with her. A chart will never show you that, but your diary will, in just a few days."
+},
+{
+"type": "point",
+"title": "Your step",
+"body": "Total sleep for 4 days, then the average",
+"icon": "bars",
+"voice": "Finally, one request: delete the chart from your phone, or at least stop opening it every night. It creates anxiety but gives no answers. Your child doesn't have to sleep like the average of thirty-four studies. She only has to be herself, and your job is to find her own rhythm and lean on it. Your step: write down your child's total sleep for four days and work out the average. That's already closer to the truth than any chart by age. Save this video so you can come back to it when the number of naps changes."
+},
+{
+"type": "cta",
+"title": "Want to work out the number together?",
+"button": "Message me on WhatsApp",
+"voice": "And if you'd like to work out your child's sleep need together, message me on WhatsApp or in Instagram Direct. The link is in the description. Thanks for watching."
+}
+]
+}
