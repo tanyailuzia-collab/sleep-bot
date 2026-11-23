@@ -95,7 +95,7 @@ function baby(cx,cy,sc,lt,mood='sleep'){let s=`<g transform="translate(${cx} ${c
 function cot(cx,cy,w=220){let s=`<g transform="translate(${cx} ${cy})">`;for(let i=0;i<=8;i++){const x=-w/2+i*w/8;s+=`<rect x="${x-4}" y="-20" width="8" height="140" fill="#e6c9a8"/>`}
  s+=`<rect x="${-w/2-10}" y="-30" width="${w+20}" height="14" rx="7" fill="#f3dcc0"/><rect x="${-w/2-10}" y="116" width="${w+20}" height="14" rx="7" fill="#f3dcc0"/>`;return s+`</g>`}
 /* signature device: internet age table */
-function table(cx,cy,lt,{hl=-1,cross=0}={}){const rows=[['6 МІС','2:00'],['8 МІС','2:00'],['10 МІС','2:30'],['12 МІС','3:00']];let s=`<g transform="translate(${cx} ${cy})">`;
+function table(cx,cy,lt,{hl=-1,cross=0}={}){const rows=[['6 МІС','2:30'],['8 МІС','3:00'],['10 МІС','3:15'],['12 МІС','3:30']];let s=`<g transform="translate(${cx} ${cy})">`;
  s+=`<rect x="-170" y="-30" width="340" height="${rows.length*56+60}" rx="14" fill="${C.cream}" stroke="${C.or}" stroke-width="4"/>`;
  s+=`<rect x="-170" y="-30" width="340" height="50" rx="14" fill="${C.or}"/><text x="0" y="6" font-size="24" font-weight="900" fill="#2a160c" text-anchor="middle">ТАБЛИЦЯ З ІНТЕРНЕТУ</text>`;
  rows.forEach((r,i)=>{const y=58+i*56;const on=i===hl;if(on)s+=`<rect x="-160" y="${y-36}" width="320" height="50" rx="8" fill="${C.yel}" opacity="${(0.6+0.3*Math.sin(lt*6)).toFixed(2)}"/>`;
@@ -147,9 +147,9 @@ function s5(lt){let s=BG('g5');
 function s6(lt){let s=bgGrad('g6','#1b1310','#2a1a10')+warmEmbers(lt,20,6);
  s+=bigText(270,200,[['ОДНА ЦИФРА',C.white]],48,lt/0.35);
  const p=ease((lt-1.4)/0.6);
- s+=`<text x="270" y="460" font-size="130" font-weight="900" fill="${C.red}" text-anchor="middle" stroke="#000" stroke-width="10" paint-order="stroke" opacity="${(1-p*0.6).toFixed(2)}">2:00</text>`;
+ s+=`<text x="270" y="460" font-size="130" font-weight="900" fill="${C.red}" text-anchor="middle" stroke="#000" stroke-width="10" paint-order="stroke" opacity="${(1-p*0.6).toFixed(2)}">3:00</text>`;
  if(p>0)s+=`<line x1="110" y1="${420}" x2="${110+320*p}" y2="${420}" stroke="${C.white}" stroke-width="12" stroke-linecap="round"/>`;
- const q=clamp((lt-3.6)/0.4);if(q>0)s+=`<g transform="translate(270 680) scale(${(0.5+0.5*back(q)).toFixed(3)})"><text x="0" y="0" font-size="150" font-weight="900" fill="${C.yel}" text-anchor="middle" stroke="#000" stroke-width="10" paint-order="stroke">2:30</text></g>`;
+ const q=clamp((lt-3.6)/0.4);if(q>0)s+=`<g transform="translate(270 680) scale(${(0.5+0.5*back(q)).toFixed(3)})"><text x="0" y="0" font-size="150" font-weight="900" fill="${C.yel}" text-anchor="middle" stroke="#000" stroke-width="10" paint-order="stroke">3:30</text></g>`;
  s+=badge(270,800,'НОРМА САМЕ ЇЇ ДИТИНИ',oB((lt-4.4)/0.3,20));
  return s}
 function s7(lt){let s=BG('g7');
