@@ -1,0 +1,153 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:RC;font-weight:800;src:url(roboto-condensed-latin-800-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF,U+26A0}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-cyrillic-900-normal.woff2);unicode-range:U+0400-04FF}
+@font-face{font-family:RC;font-weight:900;src:url(roboto-condensed-latin-900-normal.woff2);unicode-range:U+0000-03FF,U+2000-206F,U+2190-21FF}
+html,body{margin:0;background:#15171c;overflow:hidden}
+#s{width:540px;height:960px;display:block}
+text{font-family:RC,sans-serif;font-weight:800}
+</style></head><body>
+<svg id="m" width="10" height="10" style="position:absolute;left:-9999px"></svg><svg id="s" viewBox="0 0 540 960" xmlns="http://www.w3.org/2000/svg"></svg>
+<script>
+const W=540,H=960;
+const C0={bg:'#0b1626',bg2:'#13243b',bld:'#0f1d31',bldEdge:'#2ec4b6',win:'#ffd28a',winOff:'#1a2c45',or:'#2ec4b6',red:'#ff6b5b',yel:'#ffd166',white:'#ffffff',bp:'#0d2744',bpLine:'#2ec4b6',skin:'#e8b48c',skinD:'#c9906a',hair:'#2b2320',hood:'#3a5a7a',teal:'#2ec4b6',navy:'#0b1626'};
+const C={bg:'#1a1030',bg2:'#2a1848',bld:'#22143c',bldEdge:'#f43f75',win:'#f8c838',winOff:'#2e1f4a',or:'#f43f75',red:'#f43f75',yel:'#f8c838',white:'#ffffff',skin:'#e8b48c',skinD:'#c9906a',hair:'#3b2418',sweat:'#5b3a8a',teal:'#9b7bff',navy:'#1a1030',lav:'#e9ddff'};
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>{x=clamp(x);return 1-Math.pow(1-x,3)};
+const back=x=>{x=clamp(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+
+/* ---------- shared pieces ---------- */
+function bgGrad(id,top,bot){return `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs><rect width="540" height="960" fill="url(#${id})"/>`}
+function embers(t,n=26,seed=1){let s='';for(let i=0;i<n;i++){const sp=20+rnd(i+seed)*40;const x=(rnd(i*3+seed)*W+Math.sin(t*1.3+i)*14)%W;const y=H-((rnd(i*7+seed)*H+t*sp)%H);const r=0.8+rnd(i*5+seed)*1.8;const o=0.35+0.5*Math.abs(Math.sin(t*2+i));s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#bdeeff" opacity="${o.toFixed(2)}"/>`}return s}
+function building(x,y,w,h,seed,t,opts={}){let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${opts.fill||C.bld}"/>`;
+ if(opts.edge!==false)s+=`<polyline points="${x},${y+h} ${x},${y} ${x+w},${y}" fill="none" stroke="${C.bldEdge}" stroke-width="2" opacity=".85"/>`;
+ const cw=opts.cw||10,ch=opts.ch||13,gx=opts.gx||8,gy=opts.gy||10;let k=0;
+ for(let yy=y+14;yy<y+h-20;yy+=ch+gy){for(let xx=x+10;xx<x+w-cw-4;xx+=cw+gx){k++;const r=rnd(seed*100+k);let on=r>0.62;
+   if(opts.flick&&rnd(seed*31+k)>0.9)on=Math.sin(t*3+k)>0;
+   if(opts.allOff)on=false;
+   s+=`<rect x="${xx}" y="${yy}" width="${cw}" height="${ch}" fill="${on?C.win:C.winOff}" opacity="${on?0.95:0.8}"/>`}}
+ return s}
+function skyline(t,seed,baseY,opts={}){let s='';const items=[[-10,240,90],[70,330,70],[130,180,110],[230,290,80],[300,220,120],[410,310,70],[470,200,90]];
+ items.forEach((b,i)=>{s+=building(b[0],baseY-b[2]-b[1]*0+0-b[1]+b[2],b[2],b[1]+200,seed+i,t,opts)});return s}
+function badge(cx,cy,label,{bg='#dbe9f7',fg='#14365c',size=15,icon='',p=1,stroke='#5b8fc4'}={}){
+ const sc=back(p);const w=label.length*size*0.56+(icon?size*1.4:0)+26;
+ return `<g transform="translate(${cx} ${cy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*3).toFixed(2)}"><rect x="${-w/2}" y="${-size*1.1}" width="${w}" height="${size*2.2}" rx="7" fill="${bg}" stroke="${stroke}" stroke-width="2"/><text x="0" y="${size*0.38}" font-size="${size}" fill="${fg}" text-anchor="middle" letter-spacing=".5">${icon?icon+' ':''}${label}</text></g>`}
+function bigText(x,y,parts,size,p=1,anchor='middle'){const sc=0.6+0.4*back(p);let spans=parts.map(([tx,col])=>`<tspan fill="${col}">${tx}</tspan>`).join('');
+ return `<g transform="translate(${x} ${y}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2.5).toFixed(2)}"><text x="0" y="0" font-size="${size}" font-weight="900" text-anchor="${anchor}" stroke="#000" stroke-width="${size*0.12}" stroke-linejoin="round" paint-order="stroke" letter-spacing="1">${spans}</text></g>`}
+
+/* subtitle: chunk = [[word,color],...]; words pop in sequentially */
+function subtitle(lines,lt,y=640){let s='';const all=lines.flat();let idx=0;
+ lines.forEach((line,li)=>{const size=30;const yy=y+li*36;
+   // measure approx positions
+   const widths=line.map(([w])=>measure(w,size)+size*0.3);const total=widths.reduce((a,b)=>a+b,0);let x=W/2-total/2;
+   line.forEach(([w,col],wi)=>{const p=clamp((lt-idx*0.09)/0.18);idx++;const cx=x+widths[wi]/2;x+=widths[wi];
+     if(p<=0)return;const sc=0.7+0.3*back(p);
+     s+=`<g transform="translate(${cx.toFixed(1)} ${yy}) scale(${sc.toFixed(3)})" opacity="${clamp(p*2).toFixed(2)}"><text x="0" y="0" font-size="${size}" text-anchor="middle" fill="${col||'#fff'}" stroke="#000" stroke-width="5" stroke-linejoin="round" paint-order="stroke">${w}</text></g>`})});
+ return s}
+const _mc={};function measure(w,size){const k=w+'|'+size;if(_mc[k])return _mc[k];const svg=document.getElementById('m');svg.innerHTML=`<text font-size="${size}" style="font-family:RC;font-weight:800">${w}</text>`;const v=svg.firstChild.getComputedTextLength();_mc[k]=v;return v}
+const Wd=(str,col)=>str.split(' ').map(w=>[w,col]);
+function subs(chunks,lt,y){ // chunks: [{t0,lines}]
+ if(!window.SUBS)return '';
+ let cur=null;for(const c of chunks)if(lt>=c.t0)cur=c;if(!cur)return '';return subtitle(cur.lines,lt-cur.t0,y)}
+function vignette(){return `<defs><radialGradient id="vg" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient></defs><rect width="540" height="960" fill="url(#vg)"/>`}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">@tanyadonchenko_proson</text>`}
+
+/* ---------- «Який курс обрати» (Чорна п'ятниця) · palette B cold blue night · hero: signpost of 3 paths + baby of different ages · device: road signpost / three cards ---------- */
+Object.assign(C,{bg:'#0b1626',tq:'#2ec4b6',co:'#ff6b5b',yel:'#f8c838',white:'#ffffff',skin:'#f0c39e',skinD:'#d29a74',hair:'#3a2418',ice:'#dff6f3',dark:'#07101c'});
+const L={handle:'@tanyadonchenko_proson'};
+const BG=id=>bgGrad(id,'#0b1626','#13304a');
+const tB=(p,size=20)=>({bg:C.tq,fg:'#07101c',stroke:'#bff3ee',size,p});
+const cB=(p,size=20)=>({bg:C.co,fg:'#fff',stroke:'#ffc9c2',size,p});
+const iB=(p,size=20)=>({bg:C.ice,fg:'#0b1626',stroke:C.tq,size,p});
+const kB=(p,size=20)=>({bg:'#0b1626',fg:C.yel,stroke:C.yel,size,p});
+function snow(lt,n=30){let s='';for(let i=0;i<n;i++){const x=(rnd(i)*540+Math.sin(lt+i)*12)%540;const y=(rnd(i+70)*960+lt*(20+rnd(i+3)*30))%960;s+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(1+rnd(i+5)*2).toFixed(1)}" fill="#dff6f3" opacity="${(0.25+0.4*rnd(i+8)).toFixed(2)}"/>`}return s}
+function baby(cx,cy,sc,lt,mood='sleep'){let s=`<g transform="translate(${cx} ${cy}) scale(${sc})">`;
+ s+=`<circle cx="0" cy="-30" r="62" fill="${C.skin}"/><ellipse cx="-62" cy="-26" rx="10" ry="15" fill="${C.skinD}"/><ellipse cx="62" cy="-26" rx="10" ry="15" fill="${C.skinD}"/>`;
+ s+=`<path d="M -20 -92 q 20 -20 30 4" stroke="${C.hair}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+ if(mood==='sleep')s+=`<path d="M -34 -30 q 10 8 20 0 M 14 -30 q 10 8 20 0" stroke="#3a2a20" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="0" cy="2" r="5" fill="#c97a6a"/>`;
+ else if(mood==='wide')s+=`<circle cx="-24" cy="-32" r="15" fill="#fff"/><circle cx="24" cy="-32" r="15" fill="#fff"/><circle cx="-22" cy="-30" r="9" fill="#1d1612"/><circle cx="26" cy="-30" r="9" fill="#1d1612"/><path d="M -14 6 q 14 10 28 0" stroke="#7a2a35" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+ else s+=`<path d="M -34 -26 l 18 -6 M 34 -26 l -18 -6" stroke="#3a2a20" stroke-width="5" stroke-linecap="round"/><ellipse cx="0" cy="6" rx="14" ry="${10+Math.abs(Math.sin(lt*12))*6}" fill="#7a2a35"/>`;
+ s+=`<circle cx="-40" cy="-8" r="10" fill="#ff8a7a" opacity=".45"/><circle cx="40" cy="-8" r="10" fill="#ff8a7a" opacity=".45"/>`;
+ return s+`</g>`}
+function signpost(cx,cy,lt,active=-1,p=1){let s=`<g transform="translate(${cx} ${cy})">`;
+ s+=`<rect x="-10" y="-40" width="20" height="300" rx="6" fill="#5b4636"/>`;
+ const arr=[['ДО 5 МІС',-1,-10],['ПО РЕЖИМУ',1,70],['САМОСТІЙНЕ',-1,150]];
+ arr.forEach((a,i)=>{const q=clamp((p*3)-i);if(q<=0)return;const dir=a[1];const on=i===active;const w=200;const x0=dir>0?6:-6-w;const col=on?C.yel:(i===0?C.tq:i===1?C.co:C.ice);
+  const tip=dir>0?`${x0+w},${a[2]+24} ${x0+w+26},${a[2]+44} ${x0+w},${a[2]+64}`:`${x0},${a[2]+24} ${x0-26},${a[2]+44} ${x0},${a[2]+64}`;
+  s+=`<g opacity="${q.toFixed(2)}" transform="translate(0 ${(1-ease(q))*20}) ${on?`translate(${dir*6*Math.sin(lt*6)} 0)`:''}"><rect x="${x0}" y="${a[2]+24}" width="${w}" height="40" fill="${col}"/><polygon points="${tip}" fill="${col}"/><text x="${x0+w/2}" y="${a[2]+52}" font-size="21" font-weight="900" fill="#07101c" text-anchor="middle">${a[0]}</text></g>`});
+ return s+`</g>`}
+function priceTag(cx,cy,old,nw,p){const q=back(clamp(p));return `<g transform="translate(${cx} ${cy}) scale(${(0.4+0.6*q).toFixed(3)})" opacity="${clamp(p*3)}"><rect x="-130" y="-46" width="260" height="92" rx="18" fill="${C.dark}" stroke="${C.yel}" stroke-width="4"/><text x="-60" y="10" font-size="28" fill="#8fa6b8" text-anchor="middle">${old}</text><line x1="-110" y1="2" x2="-10" y2="2" stroke="${C.co}" stroke-width="5"/><text x="60" y="16" font-size="44" font-weight="900" fill="${C.yel}" text-anchor="middle">${nw}</text><text x="0" y="-22" font-size="15" fill="${C.ice}" text-anchor="middle">ГРН</text></g>`}
+function clock(cx,cy,r,lt,txt,col){return `<g transform="translate(${cx} ${cy})"><circle r="${r}" fill="${C.dark}" stroke="${col}" stroke-width="7"/><line x1="0" y1="0" x2="${(Math.sin(lt*4)*r*0.6).toFixed(1)}" y2="${(-Math.cos(lt*4)*r*0.6).toFixed(1)}" stroke="${col}" stroke-width="7" stroke-linecap="round"/><circle r="7" fill="${col}"/></g><text x="${cx}" y="${cy+r+42}" font-size="34" font-weight="900" fill="${col}" text-anchor="middle" stroke="#000" stroke-width="5" paint-order="stroke">${txt}</text>`}
+function icon(cx,cy,emoji,crossP){let s=`<g transform="translate(${cx} ${cy})"><circle r="54" fill="${C.dark}" stroke="${C.ice}" stroke-width="4"/><text x="0" y="18" font-size="50" text-anchor="middle">${emoji}</text>`;
+ if(crossP>0){const c=ease(clamp(crossP));s+=`<line x1="-40" y1="-40" x2="${-40+80*c}" y2="${-40+80*c}" stroke="${C.co}" stroke-width="10" stroke-linecap="round"/>`}return s+`</g>`}
+function crib(cx,cy,w=240){let s=`<g transform="translate(${cx} ${cy})">`;for(let i=0;i<=8;i++){const x=-w/2+i*w/8;s+=`<rect x="${x-4}" y="-20" width="8" height="140" fill="#9fd9d2"/>`}
+ s+=`<rect x="${-w/2-10}" y="-30" width="${w+20}" height="14" rx="7" fill="${C.ice}"/><rect x="${-w/2-10}" y="116" width="${w+20}" height="14" rx="7" fill="${C.ice}"/>`;return s+`</g>`}
+/* scenes */
+function s1(lt){let s=bgGrad('g1','#07101c','#13304a')+snow(lt);
+ s+=badge(270,110,'ЧОРНА П\'ЯТНИЦЯ',{bg:'#000',fg:C.yel,stroke:C.yel,size:22,p:lt/0.3});
+ s+=bigText(270,250,[['−40%',C.co]],120,(lt-0.15)/0.35);
+ s+=bigText(270,330,[['ЯКИЙ КУРС ОБРАТИ?',C.white]],42,(lt-0.5)/0.35);
+ s+=signpost(270,470,lt,-1,clamp((lt-1.2)/1.2));
+ s+=badge(270,860,'ЩОБ НЕ КУПУВАТИ НАОСЛІП',iB((lt-3.6)/0.3,19));
+ return s}
+function s2(lt){let s=BG('g2')+snow(lt,16);
+ s+=`<g transform="translate(270 150) scale(0.6) translate(-270 -470)">`+signpost(270,470,lt,0,1)+`</g>`;
+ s+=`<ellipse cx="270" cy="560" rx="150" ry="90" fill="#1d4466"/>`+baby(270,560,1.2,lt,'sleep');
+ s+=badge(270,700,'МАЛЮКУ ДО 5 МІСЯЦІВ',tB((lt-0.6)/0.3,22));
+ s+=badge(270,770,'ДЕНЬ ЗА ЙОГО НОРМОЮ З САМОГО ПОЧАТКУ',iB((lt-1.8)/0.3,16));
+ s+=priceTag(270,880,'1800','1080',(lt-3.4)/0.4);
+ return s}
+function s3(lt){let s=BG('g3')+snow(lt,16);
+ s+=`<g transform="translate(270 150) scale(0.6) translate(-270 -470)">`+signpost(270,470,lt,1,1)+`</g>`;
+ s+=clock(150,360,70,lt,'20 ХВ',C.co)+clock(390,360,70,lt*0.4,'2 ГОД',C.tq);
+ const p=clamp((lt-2.2)/0.6);s+=`<g opacity="${p}"><circle cx="270" cy="${640-p*40}" r="46" fill="${C.yel}"/><rect x="120" y="640" width="300" height="80" fill="#13304a"/></g><text x="270" y="700" font-size="32" font-weight="900" fill="${C.yel}" text-anchor="middle" opacity="${p}">РАНОК ПОВЗЕ РАНІШЕ</text>`;
+ s+=badge(270,780,'ВКЛАДАННЯ ЗАТЯГУЄТЬСЯ',cB((lt-1.4)/0.3,20));
+ s+=priceTag(270,880,'2400','1440',(lt-3.6)/0.4);
+ return s}
+function s4(lt){let s=BG('g4')+snow(lt,16);
+ s+=`<g transform="translate(270 150) scale(0.6) translate(-270 -470)">`+signpost(270,470,lt,2,1)+`</g>`;
+ s+=icon(130,380,'🤱',(lt-1.6)/0.3)+icon(270,380,'🙌',(lt-1.9)/0.3)+icon(410,380,'⚪',(lt-2.2)/0.3);
+ s+=`<text x="410" y="470" font-size="16" fill="${C.ice}" text-anchor="middle">ФІТБОЛ</text>`;
+ const q=clamp((lt-2.8)/0.5);s+=`<g opacity="${q}">`+crib(270,600,200)+baby(270,620,0.7,lt,'sleep')+`</g>`;
+ s+=badge(270,780,'БЕЗ ВИПЛАКУВАННЯ',tB((lt-3.6)/0.3,24));
+ s+=priceTag(270,880,'4200','2520',(lt-4.2)/0.4);
+ return s}
+function s5(lt){let s=BG('g5')+snow(lt,20);
+ s+=bigText(270,150,[['ХОЧЕТЕ, ЩОБ Я ПОДИВИЛАСЬ',C.white]],32,lt/0.3);
+ s+=bigText(270,200,[['НА ВАШУ ДИТИНУ?',C.yel]],40,(lt-0.15)/0.3);
+ s+=baby(270,480,1.1,lt,'wide');
+ const m=clamp((lt-0.8)/0.6);s+=`<g transform="translate(${270+Math.cos(lt*1.5)*170} ${470+Math.sin(lt*1.5)*90})" opacity="${m}"><circle r="70" fill="none" stroke="${C.yel}" stroke-width="12"/><line x1="50" y1="50" x2="110" y2="110" stroke="${C.yel}" stroke-width="18" stroke-linecap="round"/></g>`;
+ s+=badge(270,700,'КУРС + РОЗБІР + ПІДТРИМКА',iB((lt-2.0)/0.3,20));
+ s+=bigText(270,820,[['−10%',C.co]],90,(lt-3.0)/0.35);
+ return s}
+function s6(lt){let s=`<rect width="540" height="960" fill="#07101c"/>`+snow(lt,40);
+ s+=`<g transform="translate(270 140) scale(0.65) translate(-270 -470)">`+signpost(270,470,lt,-1,1)+`</g>`;
+ s+=bigText(270,620,[['−40%',C.co]],110,(lt-0.2)/0.35);
+ s+=bigText(270,690,[['ДО 30 ЛИСТОПАДА',C.yel]],40,(lt-0.6)/0.3);
+ s+=badge(270,780,'ПОСИЛАННЯ В ШАПЦІ ПРОФІЛЮ',{bg:C.yel,fg:'#07101c',stroke:'#fff',size:19,p:(lt-1.2)/0.3});
+ s+=`<text x="270" y="860" font-size="20" fill="#fff" text-anchor="middle" opacity="${clamp((lt-1.0)*3)}">${L.handle}</text>`;
+ return s}
+function handle(){return `<text x="${W-16}" y="${H-40}" font-size="13" fill="#fff" opacity=".7" text-anchor="end">${L.handle}</text>`}
+const SCENES=[[s1,7.0],[s2,7.6],[s3,7.6],[s4,7.4],[s5,7.4],[s6,6.0]];
+window.SUBS=false;
+const _st=[];{let a=0;for(const sc of SCENES){_st.push(a);a+=sc[1]}}
+const TOTAL0=SCENES.reduce((a,b)=>a+b[1],0);
+window.SFX=[{t:0,name:'drone',vol:.2,dur:TOTAL0},{t:0.02,name:'boom',vol:.5},{t:0.15,name:'riser',vol:.3},{t:0.4,name:'pop',vol:.45}];
+_st.slice(1).forEach(t=>window.SFX.push({t:t-0.15,name:'whoosh',vol:.55}));
+const _e=[[0,1.3,'click',.5],[0,3.6,'pop'],[1,0.6,'pop'],[1,1.8,'pop'],[1,3.4,'ding',.45],[2,0,'clock_ticking',.3,2.2],[2,1.4,'pop'],[2,2.2,'alarm',.3],[2,3.6,'ding',.45],[3,1.6,'pop'],[3,1.9,'pop'],[3,2.2,'pop'],[3,3.6,'pop'],[3,4.2,'ding',.45],[4,0.8,'whoosh',.4],[4,2.0,'pop'],[4,3.0,'boom',.45],[5,0.2,'boom',.45],[5,0.6,'pop'],[5,1.2,'ding',.5]];
+_e.forEach(([i,dt,n,v,d])=>window.SFX.push(Object.assign({t:_st[i]+dt,name:n,vol:v||.5},d?{dur:d}:{})));
+const TOTAL=TOTAL0;const XF=0.18;
+function frame(t){let acc=0,out='';
+for(let i=0;i<SCENES.length;i++){const [fn,d]=SCENES[i];const st=acc;acc+=d;
+if(t>=st&&t<acc){out=`<g>${fn(t-st)}</g>`;
+if(i<SCENES.length-1&&t>acc-XF){const p=(t-(acc-XF))/XF;const sc=1.08-0.08*p;out+=`<g opacity="${p.toFixed(3)}" transform="translate(270 480) scale(${sc.toFixed(3)}) translate(-270 -480)">${SCENES[i+1][0](0)}</g>`}
+break}}
+out+=vignette();
+if(t<TOTAL-SCENES[SCENES.length-1][1])out+=handle();
+document.getElementById('s').innerHTML=out}
+window.TOTAL=TOTAL;window.frame=frame;frame(0.9);
+window.FPS=30;
+</script></body></html>
